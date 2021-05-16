@@ -1,0 +1,30 @@
+name: Web
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: yarn install
+        working-directory: web
+        run: |
+          yarn install
+
+      - name: Type-check
+        working-directory: web
+        run: |
+          yarn typecheck
+
+      - name: Build
+        working-directory: web
+        run: |
+          yarn build
