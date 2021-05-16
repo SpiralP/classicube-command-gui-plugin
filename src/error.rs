@@ -9,5 +9,6 @@ error_chain! {
         ParseIntError(::std::num::ParseIntError);
         ParseBoolError(::std::str::ParseBoolError);
         Utf8Error(::std::str::Utf8Error);
+        Serde(serde_json::Error);
     }
 }
