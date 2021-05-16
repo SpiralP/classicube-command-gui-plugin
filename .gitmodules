@@ -1,0 +1,3 @@
+[submodule "CommandGuiHelperPlugin/MCGalaxy"]
+	path = CommandGuiHelperPlugin/MCGalaxy
+	url = https://github.com/UnknownShadow200/MCGalaxy.git
