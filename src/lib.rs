@@ -2,6 +2,7 @@
 
 mod error;
 mod logger;
+mod plugin;
 
 use classicube_sys::IGameComponent;
 use std::{os::raw::c_int, ptr};
@@ -15,12 +16,16 @@ extern "C" fn init() {
             "Init {}",
             concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION"))
         );
+
+        plugin::init();
     })
 }
 
 extern "C" fn free() {
     tracing::debug_span!("free").in_scope(|| {
         debug!("Free");
+
+        plugin::free();
     });
 }
 
