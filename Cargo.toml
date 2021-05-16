@@ -1,0 +1,23 @@
+[package]
+name = "classicube-command-gui"
+version = "0.1.0"
+edition = "2018"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+classicube-sys = { git = "https://github.com/SpiralP/rust-classicube-sys.git" }
+classicube-helpers = { git = "https://github.com/SpiralP/rust-classicube-helpers.git" }
+error-chain = "0.12"
+tracing = "0.1"
+tracing-subscriber = "0.2"
+
+
+[package.metadata.release]
+disable-publish = true
+tag-message = "Release version {{version}}"
+pre-release-commit-message = "Release {{version}}"
+post-release-commit-message = "Begin {{next_version}}"
+dev-version-ext = "alpha"
