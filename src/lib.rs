@@ -1,5 +1,7 @@
 #![feature(const_fn_trait_bound)]
 
+mod async_manager;
+mod chat;
 mod error;
 mod logger;
 mod plugin;
@@ -36,7 +38,11 @@ extern "C" fn reset() {}
 extern "C" fn on_new_map() {}
 
 #[tracing::instrument]
-extern "C" fn on_new_map_loaded() {}
+extern "C" fn on_new_map_loaded() {
+    async_manager::spawn(async {
+        plugin::open().await.unwrap();
+    });
+}
 
 #[no_mangle]
 pub static Plugin_ApiVersion: c_int = 1;

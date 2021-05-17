@@ -1,18 +1,11 @@
-use crate::error::Result;
+use crate::{async_manager, chat, error::Result, plugin};
 use classicube_helpers::color::{RED, WHITE};
-use classicube_sys::{cc_string, Chat_Add, OwnedChatCommand, OwnedString};
+use classicube_sys::{cc_string, OwnedChatCommand};
 use std::{cell::Cell, os::raw::c_int, slice};
-
-fn chat_print<S: Into<Vec<u8>>>(s: S) {
-    let owned_string = OwnedString::new(s);
-    unsafe {
-        Chat_Add(owned_string.as_cc_string());
-    }
-}
 
 fn chat_print_result(result: Result<()>) {
     if let Err(e) = result {
-        chat_print(format!("{}Error: {}{}", RED, WHITE, e));
+        chat::print(format!("{}Error: {}{}", RED, WHITE, e));
     }
 }
 
@@ -23,11 +16,15 @@ extern "C" fn c_chat_command_callback(args: *const cc_string, args_count: c_int)
 
     match args.as_slice() {
         ["open"] => {
-            chat_print_result(crate::plugin::open());
+            async_manager::spawn_local_on_main_thread(async {
+                let result =
+                    async { Ok(async_manager::spawn(async { plugin::open().await }).await??) };
+                chat_print_result(result.await);
+            });
         }
 
         _ => {
-            chat_print("/client CommandGui open");
+            chat::print("/client CommandGui open");
         }
     }
 }

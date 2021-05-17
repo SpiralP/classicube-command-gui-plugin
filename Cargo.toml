@@ -8,17 +8,22 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-base64 = "0.13.0"
+async-dispatcher = { git = "https://github.com/SpiralP/rust-async-dispatcher.git" }
+base64 = "0.13"
 classicube-helpers = { git = "https://github.com/SpiralP/rust-classicube-helpers.git" }
 classicube-sys = { git = "https://github.com/SpiralP/rust-classicube-sys.git" }
 error-chain = "0.12"
+futures = "0.3"
+futures-timer = "3"
+lazy_static = "1"
 open = "1"
 rand = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.14"
 tracing = "0.1"
 tracing-subscriber = "0.2"
-tungstenite = "0.13"
 
 
 [package.metadata.release]

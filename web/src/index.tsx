@@ -2,4 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 
-ReactDOM.render(<App />, document.getElementById("root"));
+let args: ConnectionArgs | undefined;
+try {
+  args = JSON.parse(atob(location.hash.slice(1)));
+  // location.hash = "";
+  // history.pushState(
+  //   "",
+  //   document.title,
+  //   window.location.pathname + window.location.search
+  // );
+} catch (e) {
+  console.error(e);
+}
+
+ReactDOM.render(<App connectionArgs={args} />, document.getElementById("root"));

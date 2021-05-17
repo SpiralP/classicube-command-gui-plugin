@@ -1,45 +1,23 @@
-use crate::error::Result;
-use classicube_helpers::tick::TickEventHandler;
-use std::{cell::RefCell, sync::mpsc::channel};
-use tracing::debug;
+use crate::{async_manager, error::Result};
 
 mod command;
 mod websocket_server;
 
-thread_local!(
-    static TICK_HANDLER: RefCell<Option<TickEventHandler>> = Default::default();
-);
-
 pub fn init() {
+    async_manager::initialize();
+
     command::init();
-
-    let (tx, rx) = channel::<usize>();
-
-    TICK_HANDLER.with(move |cell| {
-        let option = &mut *cell.borrow_mut();
-
-        let mut tick_handler = TickEventHandler::new();
-        tick_handler.on(move |_| {
-            for event in rx.try_iter() {
-                debug!("{:#?}", event);
-            }
-        });
-
-        *option = Some(tick_handler);
-    });
 }
 
 pub fn free() {
-    TICK_HANDLER.with(move |cell| {
-        let option = &mut *cell.borrow_mut();
-        drop(option.take());
-    });
-
     command::free();
+
+    // this will stop all tasks immediately
+    async_manager::shutdown();
 }
 
-pub fn open() -> Result<()> {
-    let args = websocket_server::start()?;
+pub async fn open() -> Result<()> {
+    let args = websocket_server::start().await?;
 
     // TODO if dev...
     open::that(format!(

@@ -10,5 +10,7 @@ error_chain! {
         ParseBoolError(::std::str::ParseBoolError);
         Utf8Error(::std::str::Utf8Error);
         Serde(serde_json::Error);
+        Tokio(tokio::task::JoinError);
+        Tungstenite(tokio_tungstenite::tungstenite::Error);
     }
 }
