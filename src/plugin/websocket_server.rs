@@ -1,8 +1,12 @@
+use super::{
+    json_types::{JsonEvent, JsonMessage},
+    tab_list_events,
+};
 use crate::{async_manager, chat, error::*};
 use futures::{future::RemoteHandle, FutureExt, Sink, SinkExt, StreamExt};
 use lazy_static::lazy_static;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::{iter, sync::Mutex};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{
@@ -92,22 +96,44 @@ pub async fn start() -> Result<ConnectionArgs> {
     Ok(ConnectionArgs { port, path })
 }
 
+fn make_message(event: JsonEvent) -> Result<Message> {
+    Ok(Message::text(serde_json::to_string(&event)?))
+}
+
 fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
-    let (mut write, read) = ws_stream.split();
-    let mut read = read.fuse();
+    let (mut connection_tx, connection_rx) = ws_stream.split();
+    let mut connection_rx = connection_rx.fuse();
 
     async_manager::spawn(async move {
         let result: Result<()> = async move {
+            let current_players = tab_list_events::get_current_players().await;
+            let mut player_event_listener = tab_list_events::make_new_listener().fuse();
+
+            connection_tx
+                .send(make_message(JsonEvent::NewPlayers(current_players))?)
+                .await
+                .chain_err(|| "sending message")?;
+
             loop {
                 futures::select! {
-                    result = read.select_next_some() => {
+                    result = connection_rx.select_next_some() => {
                         let msg = result?;
 
                         debug!("{}", msg);
 
                         if let Ok(text) = msg.into_text() {
-                            handle_message(serde_json::from_str(&text)?, &mut write).await?;
+                            handle_message(serde_json::from_str(&text)?, &mut connection_tx).await?;
                         }
+                    }
+
+                    result = player_event_listener.select_next_some() => {
+                        let event = result.chain_err(|| "BroadcastStreamRecvError")?;
+                        debug!("{:#?}", event);
+
+                        connection_tx
+                            .send(make_message(event)?)
+                            .await
+                            .chain_err(|| "sending message")?;
                     }
                 };
             }
@@ -122,26 +148,33 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
     Ok(())
 }
 
-#[derive(Deserialize)]
-#[serde(tag = "type", content = "data")] // {type: "NewAddress", data: "aa:aa:aa"}
-#[serde(rename_all = "camelCase")]
-enum JsonMessage {
-    ChatCommand(String),
-}
-
-async fn handle_message<S>(message: JsonMessage, write: &mut S) -> Result<()>
+async fn handle_message<S>(message: JsonMessage, _connection: &mut S) -> Result<()>
 where
     S: Sink<Message> + Unpin,
 {
     match message {
         JsonMessage::ChatCommand(text) => {
             chat::send(format!("/{}", text));
-
-            // if write.send(Message::text("ok".to_string())).await.is_err() {
-            //     bail!("sending message");
-            // }
         }
     }
 
     Ok(())
 }
+
+/*
+
+my name
+* title, color
+
+all players names
+* tp
+
+players on my map
+* slap, os kick
+
+my rank
+* which commands i can execute (need smarter checking for extra permission commands)
+
+all players ranks?
+
+*/

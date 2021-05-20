@@ -93,6 +93,12 @@ function useConnection(connectionArgs?: ConnectionArgs) {
 
       setConnection(connection);
     });
+    connection.addEventListener("message", ({ data }) => {
+      if (typeof data !== "string") return;
+
+      const obj = JSON.parse(data);
+      console.log(obj);
+    });
 
     connection.addEventListener("close", () => {
       window.close();

@@ -1,6 +1,7 @@
 use tracing::*;
 
 pub fn print<S: Into<String>>(s: S) {
+    #[allow(unused_mut)]
     let mut s = s.into();
     info!("{}", s);
 
