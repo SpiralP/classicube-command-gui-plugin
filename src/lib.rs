@@ -39,8 +39,15 @@ extern "C" fn on_new_map() {}
 
 #[tracing::instrument]
 extern "C" fn on_new_map_loaded() {
-    async_manager::spawn(async {
-        plugin::open().await.unwrap();
+    use std::sync::Once;
+
+    static START: Once = Once::new();
+
+    START.call_once(|| {
+        // run initialization here
+        async_manager::spawn(async {
+            plugin::open().await.unwrap();
+        });
     });
 }
 

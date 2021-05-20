@@ -8,7 +8,7 @@ use tokio_stream::wrappers::BroadcastStream;
 
 lazy_static! {
     static ref TAB_LIST_EVENT: Mutex<(broadcast::Sender<JsonEvent>, broadcast::Receiver<JsonEvent>)> =
-        Mutex::new(broadcast::channel(2));
+        Mutex::new(broadcast::channel(256));
 }
 
 thread_local!(
@@ -87,14 +87,6 @@ pub fn init() {
         });
 
         *global = Some(tab_list);
-    });
-
-    async_manager::spawn_on_main_thread(async move {
-        let guard = TAB_LIST_EVENT.lock().unwrap();
-        guard.0.send(JsonEvent::WeDisconnected).unwrap();
-        guard.0.send(JsonEvent::WeDisconnected).unwrap();
-        guard.0.send(JsonEvent::WeDisconnected).unwrap();
-        guard.0.send(JsonEvent::WeDisconnected).unwrap();
     });
 }
 

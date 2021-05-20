@@ -1,3 +1,4 @@
+import { Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
 
 export function usePlayers({ connection }: { connection: WebSocket }) {
@@ -20,6 +21,8 @@ export function usePlayers({ connection }: { connection: WebSocket }) {
           delete o[obj.data];
           return o;
         });
+      } else if (obj.type === "weDisconnected") {
+        setPlayers({});
       }
     }
     connection.addEventListener("message", listener);
@@ -35,11 +38,31 @@ export function usePlayers({ connection }: { connection: WebSocket }) {
 export function TabList({ connection }: { connection: WebSocket }) {
   const players = usePlayers({ connection });
   return (
-    <div>
+    <Menu>
       {Object.entries(players).map(([id, p]) => (
-        <pre key={id} title={p.realName}>{`${p.nickName} ${p.group}`}</pre>
+        <MenuItem
+          key={id}
+          title={p.realName}
+          text={p.nickName}
+          label={p.group}
+          popoverProps={{
+            interactionKind: PopoverInteractionKind.CLICK,
+          }}
+        >
+          <MenuItem
+            text="TP"
+            onClick={() => {
+              send(connection, {
+                type: "chatCommand",
+                data: `TP ${p.realName}`,
+              });
+            }}
+          />
+          <MenuItem text="Child two" />
+          <MenuItem text="Child three" />
+        </MenuItem>
       ))}
-    </div>
+    </Menu>
   );
 }
 

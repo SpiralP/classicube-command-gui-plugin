@@ -60,6 +60,7 @@ export default function App({
                 key={command.name}
                 onClick={handleClick}
                 text={command.name}
+                label={command.help.join(" ").slice(0, 30)}
               />
             );
           }}
@@ -92,12 +93,6 @@ function useConnection(connectionArgs?: ConnectionArgs) {
     );
     connection.addEventListener("open", () => {
       console.log("connected!");
-
-      const jsonMessage: JsonMessage = {
-        type: "chatCommand",
-        data: "hello!",
-      };
-      connection.send(JSON.stringify(jsonMessage));
 
       setConnection(connection);
     });
