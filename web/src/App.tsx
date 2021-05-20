@@ -1,6 +1,7 @@
 import { MenuItem, useHotkeys } from "@blueprintjs/core";
 import { Omnibar } from "@blueprintjs/select";
 import React, { useEffect, useMemo, useState } from "react";
+import { TabList } from "./TabList";
 
 interface CommandInfo {
   type: string;
@@ -67,7 +68,14 @@ export default function App({
           }}
         />
       ) : null}
-      {connection ? <h1>connected</h1> : "no connection"}
+      {connection ? (
+        <>
+          <h1>connected!</h1>
+          <TabList connection={connection} />
+        </>
+      ) : (
+        "no connection"
+      )}
     </div>
   );
 }

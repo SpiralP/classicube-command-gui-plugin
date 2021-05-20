@@ -26,4 +26,5 @@ pub enum JsonEvent {
 #[serde(rename_all = "camelCase")]
 pub enum JsonMessage {
     ChatCommand(String),
+    TabListSubscribe,
 }

@@ -3,7 +3,7 @@ use super::{
     tab_list_events,
 };
 use crate::{async_manager, chat, error::*};
-use futures::{future::RemoteHandle, FutureExt, Sink, SinkExt, StreamExt};
+use futures::{future::RemoteHandle, FutureExt, SinkExt, StreamExt};
 use lazy_static::lazy_static;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde::Serialize;
@@ -106,13 +106,8 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
 
     async_manager::spawn(async move {
         let result: Result<()> = async move {
-            let current_players = tab_list_events::get_current_players().await;
+            let mut player_event_subscribed = false;
             let mut player_event_listener = tab_list_events::make_new_listener().fuse();
-
-            connection_tx
-                .send(make_message(JsonEvent::NewPlayers(current_players))?)
-                .await
-                .chain_err(|| "sending message")?;
 
             loop {
                 futures::select! {
@@ -122,18 +117,38 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
                         debug!("{}", msg);
 
                         if let Ok(text) = msg.into_text() {
-                            handle_message(serde_json::from_str(&text)?, &mut connection_tx).await?;
+                            match serde_json::from_str(&text)? {
+                                JsonMessage::ChatCommand(text) => {
+                                    async_manager::spawn_on_main_thread(async move {
+                                        chat::send(format!("/{}", text));
+                                    });
+                                }
+
+                                JsonMessage::TabListSubscribe => {
+                                    let current_players = tab_list_events::get_current_players().await;
+                                    player_event_subscribed = true;
+
+                                    connection_tx
+                                        .send(make_message(JsonEvent::NewPlayers(current_players))?)
+                                        .await
+                                        .chain_err(|| "sending message")?;
+
+                                }
+                            }
                         }
+
                     }
 
                     result = player_event_listener.select_next_some() => {
-                        let event = result.chain_err(|| "BroadcastStreamRecvError")?;
-                        debug!("{:#?}", event);
+                        if player_event_subscribed {
+                            let event = result.chain_err(|| "BroadcastStreamRecvError")?;
+                            debug!("{:#?}", event);
 
-                        connection_tx
-                            .send(make_message(event)?)
-                            .await
-                            .chain_err(|| "sending message")?;
+                            connection_tx
+                                .send(make_message(event)?)
+                                .await
+                                .chain_err(|| "sending message")?;
+                        }
                     }
                 };
             }
@@ -144,19 +159,6 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
             warn!("{}", e);
         }
     });
-
-    Ok(())
-}
-
-async fn handle_message<S>(message: JsonMessage, _connection: &mut S) -> Result<()>
-where
-    S: Sink<Message> + Unpin,
-{
-    match message {
-        JsonMessage::ChatCommand(text) => {
-            chat::send(format!("/{}", text));
-        }
-    }
 
     Ok(())
 }
