@@ -21,6 +21,11 @@ interface JsonPlayer {
   rank: number;
 }
 
+interface ColorCode {
+  char: string;
+  color: string;
+}
+
 interface NewPlayersJsonEvent {
   type: "newPlayers";
   data: JsonPlayer[];
@@ -43,10 +48,15 @@ interface PlayerChangedJsonEvent {
 interface WeDisconnectedJsonEvent {
   type: "weDisconnected";
 }
+interface ColorCodesJsonEvent {
+  type: "colorCodes";
+  data: ColorCode[];
+}
 
 type JsonEvent =
   | NewPlayersJsonEvent
   | PlayerAddedJsonEvent
   | PlayerRemovedJsonEvent
   | PlayerChangedJsonEvent
-  | WeDisconnectedJsonEvent;
+  | WeDisconnectedJsonEvent
+  | ColorCodesJsonEvent;

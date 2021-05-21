@@ -2,8 +2,9 @@ use super::{
     json_types::{JsonEvent, JsonMessage},
     tab_list_events,
 };
-use crate::{async_manager, chat, error::*};
-use futures::{future::RemoteHandle, FutureExt, SinkExt, StreamExt};
+use crate::{async_manager, chat, error::*, plugin::json_types::ColorCode};
+use classicube_sys::Drawer2D;
+use futures::{future::RemoteHandle, stream::SplitSink, FutureExt, SinkExt, StreamExt};
 use lazy_static::lazy_static;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde::Serialize;
@@ -116,27 +117,8 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
 
                         debug!("{}", msg);
 
-                        if let Ok(text) = msg.into_text() {
-                            match serde_json::from_str(&text)? {
-                                JsonMessage::ChatCommand(text) => {
-                                    async_manager::spawn_on_main_thread(async move {
-                                        chat::send(format!("/{}", text));
-                                    });
-                                }
-
-                                JsonMessage::TabListSubscribe => {
-                                    let current_players = tab_list_events::get_current_players().await;
-                                    player_event_subscribed = true;
-
-                                    connection_tx
-                                        .send(make_message(JsonEvent::NewPlayers(current_players))?)
-                                        .await
-                                        .chain_err(|| "sending message")?;
-
-                                }
-                            }
-                        }
-
+                        handle_incoming(msg, &mut player_event_subscribed, &mut connection_tx)
+                            .await?;
                     }
 
                     result = player_event_listener.select_next_some() => {
@@ -159,6 +141,61 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
             warn!("{}", e);
         }
     });
+
+    Ok(())
+}
+
+const BITMAPCOL_B_SHIFT: u8 = 0;
+const BITMAPCOL_G_SHIFT: u8 = 8;
+const BITMAPCOL_R_SHIFT: u8 = 16;
+const BITMAPCOL_A_SHIFT: u8 = 24;
+
+async fn handle_incoming(
+    msg: Message,
+    player_event_subscribed: &mut bool,
+    connection_tx: &mut SplitSink<WebSocketStream<TcpStream>, Message>,
+) -> Result<()> {
+    if let Ok(text) = msg.into_text() {
+        match serde_json::from_str(&text)? {
+            JsonMessage::ChatCommand(text) => {
+                async_manager::spawn_on_main_thread(async move {
+                    chat::send(format!("/{}", text));
+                });
+            }
+
+            JsonMessage::TabListSubscribe => {
+                let current_players = tab_list_events::get_current_players().await;
+                *player_event_subscribed = true;
+
+                connection_tx
+                    .send(make_message(JsonEvent::NewPlayers(current_players))?)
+                    .await
+                    .chain_err(|| "sending message")?;
+
+                let codes = (0..=255u8)
+                    .filter_map(|i| {
+                        let n = unsafe { Drawer2D.Colors[i as usize] };
+                        if n >> BITMAPCOL_A_SHIFT != 0 {
+                            let r: u8 = (n >> BITMAPCOL_R_SHIFT) as u8;
+                            let g: u8 = (n >> BITMAPCOL_G_SHIFT) as u8;
+                            let b: u8 = (n >> BITMAPCOL_B_SHIFT) as u8;
+                            Some(ColorCode {
+                                char: (i as char).to_string(),
+                                color: format!("{:02X}{:02X}{:02X}", r, g, b),
+                            })
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>();
+
+                connection_tx
+                    .send(make_message(JsonEvent::ColorCodes(codes))?)
+                    .await
+                    .chain_err(|| "sending message")?;
+            }
+        }
+    }
 
     Ok(())
 }

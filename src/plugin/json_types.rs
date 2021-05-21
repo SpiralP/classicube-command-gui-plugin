@@ -19,6 +19,14 @@ pub enum JsonEvent {
     PlayerRemoved { id: u8 },
     PlayerChanged(JsonPlayer),
     WeDisconnected,
+    ColorCodes(Vec<ColorCode>),
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ColorCode {
+    pub char: String,
+    pub color: String,
 }
 
 #[derive(Debug, Deserialize)]

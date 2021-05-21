@@ -1,8 +1,13 @@
 import { Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
 
-export function usePlayers({ connection }: { connection: WebSocket }) {
+export function usePlayers({
+  connection,
+}: {
+  connection: WebSocket;
+}): [Record<number, JsonPlayer>, Record<string, string>] {
   const [players, setPlayers] = useState<Record<number, JsonPlayer>>({});
+  const [colorCodes, setColorCodes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     function listener({ data }: MessageEvent<any>) {
@@ -23,6 +28,10 @@ export function usePlayers({ connection }: { connection: WebSocket }) {
         });
       } else if (obj.type === "weDisconnected") {
         setPlayers({});
+      } else if (obj.type === "colorCodes") {
+        setColorCodes(
+          Object.fromEntries(obj.data.map(({ char, color }) => [char, color]))
+        );
       }
     }
     connection.addEventListener("message", listener);
@@ -32,18 +41,56 @@ export function usePlayers({ connection }: { connection: WebSocket }) {
     };
   }, []);
 
-  return players;
+  return [players, colorCodes];
+}
+
+function Colored({
+  text,
+  colorCodes,
+}: {
+  text: string;
+  colorCodes: Record<string, string>;
+}) {
+  const parts: JSX.Element[] = [];
+  let hadCodeSymbol = false;
+  let currentColor = "000000";
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === "&") {
+      hadCodeSymbol = true;
+      continue;
+    }
+    if (hadCodeSymbol) {
+      hadCodeSymbol = false;
+      const color = colorCodes[c];
+      if (color) {
+        currentColor = color;
+        continue;
+      }
+    }
+
+    console.log(currentColor);
+    parts.push(
+      <span style={{ fontWeight: "bold", color: `#${currentColor}` }}>{c}</span>
+    );
+  }
+
+  // &aasdf
+  // <pre color={a}>asdf</pre>
+
+  return <div>{parts}</div>;
 }
 
 export function TabList({ connection }: { connection: WebSocket }) {
-  const players = usePlayers({ connection });
+  const [players, colorCodes] = usePlayers({ connection });
+
   return (
     <Menu>
       {Object.entries(players).map(([id, p]) => (
         <MenuItem
           key={id}
           title={p.realName}
-          text={p.nickName}
+          text={<Colored text={p.nickName} colorCodes={colorCodes} />}
           label={p.group}
           popoverProps={{
             interactionKind: PopoverInteractionKind.CLICK,
