@@ -1,8 +1,16 @@
 use super::{
+    helpers::BitmapCol_A,
     json_types::{JsonEvent, JsonMessage},
     tab_list_events,
 };
-use crate::{async_manager, chat, error::*, plugin::json_types::ColorCode};
+use crate::{
+    async_manager, chat,
+    error::*,
+    plugin::{
+        helpers::{make_text_bitmap, BitmapCol_B, BitmapCol_G, BitmapCol_R},
+        json_types::ColorCode,
+    },
+};
 use classicube_sys::Drawer2D;
 use futures::{future::RemoteHandle, stream::SplitSink, FutureExt, SinkExt, StreamExt};
 use lazy_static::lazy_static;
@@ -145,11 +153,6 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
     Ok(())
 }
 
-const BITMAPCOL_B_SHIFT: u8 = 0;
-const BITMAPCOL_G_SHIFT: u8 = 8;
-const BITMAPCOL_R_SHIFT: u8 = 16;
-const BITMAPCOL_A_SHIFT: u8 = 24;
-
 async fn handle_incoming(
     msg: Message,
     player_event_subscribed: &mut bool,
@@ -171,14 +174,16 @@ async fn handle_incoming(
                     .send(make_message(JsonEvent::NewPlayers(current_players))?)
                     .await
                     .chain_err(|| "sending message")?;
+            }
 
+            JsonMessage::AskColorCodes => {
                 let codes = (0..=255u8)
                     .filter_map(|i| {
                         let n = unsafe { Drawer2D.Colors[i as usize] };
-                        if n >> BITMAPCOL_A_SHIFT != 0 {
-                            let r: u8 = (n >> BITMAPCOL_R_SHIFT) as u8;
-                            let g: u8 = (n >> BITMAPCOL_G_SHIFT) as u8;
-                            let b: u8 = (n >> BITMAPCOL_B_SHIFT) as u8;
+                        if BitmapCol_A(n) != 0 {
+                            let r: u8 = BitmapCol_R(n);
+                            let g: u8 = BitmapCol_G(n);
+                            let b: u8 = BitmapCol_B(n);
                             Some(ColorCode {
                                 char: (i as char).to_string(),
                                 color: format!("{:02X}{:02X}{:02X}", r, g, b),
@@ -191,6 +196,20 @@ async fn handle_incoming(
 
                 connection_tx
                     .send(make_message(JsonEvent::ColorCodes(codes))?)
+                    .await
+                    .chain_err(|| "sending message")?;
+            }
+
+            JsonMessage::RenderText(text) => {
+                let (pixels, width, height) = make_text_bitmap(&text)?;
+
+                connection_tx
+                    .send(make_message(JsonEvent::RenderedText {
+                        text,
+                        pixels,
+                        width,
+                        height,
+                    })?)
                     .await
                     .chain_err(|| "sending message")?;
             }

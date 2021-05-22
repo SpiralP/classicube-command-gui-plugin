@@ -1,6 +1,7 @@
 use crate::{async_manager, error::Result};
 
 mod command;
+mod helpers;
 mod json_types;
 mod map_url_listener;
 mod tab_list_events;

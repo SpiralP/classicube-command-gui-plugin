@@ -16,10 +16,19 @@ pub struct JsonPlayer {
 pub enum JsonEvent {
     NewPlayers(Vec<JsonPlayer>),
     PlayerAdded(JsonPlayer),
-    PlayerRemoved { id: u8 },
+    PlayerRemoved {
+        id: u8,
+    },
     PlayerChanged(JsonPlayer),
     WeDisconnected,
     ColorCodes(Vec<ColorCode>),
+    RenderedText {
+        text: String,
+        // R G B A order
+        pixels: Vec<u8>,
+        width: usize,
+        height: usize,
+    },
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -35,4 +44,6 @@ pub struct ColorCode {
 pub enum JsonMessage {
     ChatCommand(String),
     TabListSubscribe,
+    AskColorCodes,
+    RenderText(String),
 }

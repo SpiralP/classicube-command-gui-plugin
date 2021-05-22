@@ -1,5 +1,5 @@
 import { Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export function usePlayers({
   connection,
@@ -12,18 +12,16 @@ export function usePlayers({
   useEffect(() => {
     function listener({ data }: MessageEvent<any>) {
       if (typeof data !== "string") return;
-
       const obj: JsonEvent = JSON.parse(data);
 
       if (obj.type === "newPlayers") {
         setPlayers(Object.fromEntries(obj.data.map((p) => [p.id, p])));
       } else if (obj.type === "playerAdded" || obj.type === "playerChanged") {
-        console.log({ ...players, [obj.data.id]: obj.data });
         setPlayers((players) => ({ ...players, [obj.data.id]: obj.data }));
       } else if (obj.type === "playerRemoved") {
         setPlayers((players) => {
           const o = { ...players };
-          delete o[obj.data];
+          delete o[obj.data.id];
           return o;
         });
       } else if (obj.type === "weDisconnected") {
@@ -36,6 +34,7 @@ export function usePlayers({
     }
     connection.addEventListener("message", listener);
     send(connection, { type: "tabListSubscribe" });
+
     return () => {
       connection.removeEventListener("message", listener);
     };
@@ -69,47 +68,90 @@ function Colored({
       }
     }
 
-    console.log(currentColor);
     parts.push(
       <span style={{ fontWeight: "bold", color: `#${currentColor}` }}>{c}</span>
     );
   }
 
-  // &aasdf
-  // <pre color={a}>asdf</pre>
-
   return <div>{parts}</div>;
+}
+
+function Rendered({
+  text,
+  connection,
+}: {
+  text: string;
+  connection: WebSocket;
+}) {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    function listener({ data }: MessageEvent<any>) {
+      if (typeof data !== "string") return;
+      const obj: JsonEvent = JSON.parse(data);
+
+      if (obj.type === "renderedText") {
+        (async () => {
+          const { text: asdf, pixels, width, height } = obj.data;
+          if (text !== asdf) return;
+
+          const bitmap = await createImageBitmap(
+            new ImageData(new Uint8ClampedArray(pixels), width, height)
+          );
+
+          const canvas = ref.current;
+          if (!canvas) throw new Error("!canvas");
+          const context = canvas.getContext("bitmaprenderer");
+          if (!context) throw new Error("!context");
+          context.transferFromImageBitmap(bitmap);
+          canvas.width = width;
+          canvas.height = height;
+        })();
+      }
+    }
+    connection.addEventListener("message", listener);
+    send(connection, { type: "renderText", data: text });
+
+    return () => {
+      connection.removeEventListener("message", listener);
+    };
+  }, []);
+
+  return <canvas ref={ref} />;
 }
 
 export function TabList({ connection }: { connection: WebSocket }) {
   const [players, colorCodes] = usePlayers({ connection });
 
   return (
-    <Menu>
-      {Object.entries(players).map(([id, p]) => (
-        <MenuItem
-          key={id}
-          title={p.realName}
-          text={<Colored text={p.nickName} colorCodes={colorCodes} />}
-          label={p.group}
-          popoverProps={{
-            interactionKind: PopoverInteractionKind.CLICK,
-          }}
-        >
+    <div>
+      {/* <Rendered text="h&cell&ao" connection={connection} /> */}
+      <Menu>
+        {Object.entries(players).map(([id, p]) => (
           <MenuItem
-            text="TP"
-            onClick={() => {
-              send(connection, {
-                type: "chatCommand",
-                data: `TP ${p.realName}`,
-              });
+            key={id}
+            title={p.realName}
+            text={<Rendered text={p.nickName} connection={connection} />}
+            label={p.group}
+            popoverProps={{
+              interactionKind: PopoverInteractionKind.CLICK,
             }}
-          />
-          <MenuItem text="Child two" />
-          <MenuItem text="Child three" />
-        </MenuItem>
-      ))}
-    </Menu>
+          >
+            <MenuItem
+              text="TP"
+              onClick={() => {
+                send(connection, {
+                  type: "chatCommand",
+                  data: `TP ${p.realName}`,
+                });
+              }}
+            />
+            <MenuItem text="Child two" />
+            <MenuItem text="Child three" />
+          </MenuItem>
+        ))}
+      </Menu>
+    </div>
   );
 }
 

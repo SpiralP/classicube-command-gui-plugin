@@ -10,8 +10,19 @@ interface ChatCommandJsonMessage {
 interface TabListSubscribeJsonMessage {
   type: "tabListSubscribe";
 }
+interface AskColorCodesJsonMessage {
+  type: "askColorCodes";
+}
+interface RenderTextJsonMessage {
+  type: "renderText";
+  data: string;
+}
 
-type JsonMessage = ChatCommandJsonMessage | TabListSubscribeJsonMessage;
+type JsonMessage =
+  | ChatCommandJsonMessage
+  | TabListSubscribeJsonMessage
+  | AskColorCodesJsonMessage
+  | RenderTextJsonMessage;
 
 interface JsonPlayer {
   id: number;
@@ -36,10 +47,9 @@ interface PlayerAddedJsonEvent {
 }
 interface PlayerRemovedJsonEvent {
   type: "playerRemoved";
-  /**
-   * id
-   */
-  data: number;
+  data: {
+    id: number;
+  };
 }
 interface PlayerChangedJsonEvent {
   type: "playerChanged";
@@ -52,6 +62,18 @@ interface ColorCodesJsonEvent {
   type: "colorCodes";
   data: ColorCode[];
 }
+interface RenderedTextJsonEvent {
+  type: "renderedText";
+  data: {
+    text: string;
+    /**
+     * R G B A order
+     */
+    pixels: number[];
+    width: number;
+    height: number;
+  };
+}
 
 type JsonEvent =
   | NewPlayersJsonEvent
@@ -59,4 +81,5 @@ type JsonEvent =
   | PlayerRemovedJsonEvent
   | PlayerChangedJsonEvent
   | WeDisconnectedJsonEvent
-  | ColorCodesJsonEvent;
+  | ColorCodesJsonEvent
+  | RenderedTextJsonEvent;

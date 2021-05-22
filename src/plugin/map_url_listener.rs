@@ -108,7 +108,7 @@ fn got_url(url: String) {
             let mut reader = FuturesBlockOnReader { async_reader };
 
             tokio::task::spawn_blocking(move || {
-                while let Some(mut zip_file) = read_zipfile_from_stream(&mut reader)? {
+                while let Some(zip_file) = read_zipfile_from_stream(&mut reader)? {
                     debug!(
                         "{}: {} bytes ({} bytes packed)",
                         zip_file.name(),

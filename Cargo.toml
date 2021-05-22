@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 async-dispatcher = { git = "https://github.com/SpiralP/rust-async-dispatcher.git" }
 base64 = "0.13"
+byteorder = "1.4.3"
 classicube-helpers = { git = "https://github.com/SpiralP/rust-classicube-helpers.git" }
 classicube-sys = { git = "https://github.com/SpiralP/rust-classicube-sys.git" }
 error-chain = "0.12"
