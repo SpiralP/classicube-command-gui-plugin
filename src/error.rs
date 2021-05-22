@@ -12,5 +12,7 @@ error_chain! {
         Serde(serde_json::Error);
         Tokio(tokio::task::JoinError);
         Tungstenite(tokio_tungstenite::tungstenite::Error);
+        Reqwest(reqwest::Error);
+        ZipError(zip::result::ZipError);
     }
 }
