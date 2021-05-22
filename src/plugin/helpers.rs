@@ -1,5 +1,4 @@
 use crate::error::*;
-use byteorder::{BigEndian, WriteBytesExt};
 use classicube_sys::{
     Bitmap, DrawTextArgs, Drawer2D_DrawText, Drawer2D_MakeFont, Drawer2D_TextHeight,
     Drawer2D_TextWidth, FontDesc, OwnedString, FONT_FLAGS_FONT_FLAGS_NONE,
@@ -11,16 +10,16 @@ const BITMAPCOL_G_SHIFT: u8 = 8;
 const BITMAPCOL_R_SHIFT: u8 = 16;
 const BITMAPCOL_A_SHIFT: u8 = 24;
 
-pub fn BitmapCol_R(col: u32) -> u8 {
+pub fn bitmap_col_r(col: u32) -> u8 {
     (col >> BITMAPCOL_R_SHIFT) as u8
 }
-pub fn BitmapCol_G(col: u32) -> u8 {
+pub fn bitmap_col_g(col: u32) -> u8 {
     (col >> BITMAPCOL_G_SHIFT) as u8
 }
-pub fn BitmapCol_B(col: u32) -> u8 {
+pub fn bitmap_col_b(col: u32) -> u8 {
     (col >> BITMAPCOL_B_SHIFT) as u8
 }
-pub fn BitmapCol_A(col: u32) -> u8 {
+pub fn bitmap_col_a(col: u32) -> u8 {
     (col >> BITMAPCOL_A_SHIFT) as u8
 }
 
@@ -66,10 +65,10 @@ pub fn make_text_bitmap(text: &str) -> Result<(Vec<u8>, usize, usize)> {
 
         let mut vec8: Vec<u8> = Vec::with_capacity(pixels.len() * 4);
         for n in pixels {
-            vec8.push(BitmapCol_R(n));
-            vec8.push(BitmapCol_G(n));
-            vec8.push(BitmapCol_B(n));
-            vec8.push(BitmapCol_A(n));
+            vec8.push(bitmap_col_r(n));
+            vec8.push(bitmap_col_g(n));
+            vec8.push(bitmap_col_b(n));
+            vec8.push(bitmap_col_a(n));
         }
 
         Ok((vec8, width, height))

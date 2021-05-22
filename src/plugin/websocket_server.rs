@@ -1,5 +1,5 @@
 use super::{
-    helpers::BitmapCol_A,
+    helpers::bitmap_col_a,
     json_types::{JsonEvent, JsonMessage},
     tab_list_events,
 };
@@ -7,7 +7,7 @@ use crate::{
     async_manager, chat,
     error::*,
     plugin::{
-        helpers::{make_text_bitmap, BitmapCol_B, BitmapCol_G, BitmapCol_R},
+        helpers::{bitmap_col_b, bitmap_col_g, bitmap_col_r, make_text_bitmap},
         json_types::ColorCode,
     },
 };
@@ -180,10 +180,10 @@ async fn handle_incoming(
                 let codes = (0..=255u8)
                     .filter_map(|i| {
                         let n = unsafe { Drawer2D.Colors[i as usize] };
-                        if BitmapCol_A(n) != 0 {
-                            let r: u8 = BitmapCol_R(n);
-                            let g: u8 = BitmapCol_G(n);
-                            let b: u8 = BitmapCol_B(n);
+                        if bitmap_col_a(n) != 0 {
+                            let r: u8 = bitmap_col_r(n);
+                            let g: u8 = bitmap_col_g(n);
+                            let b: u8 = bitmap_col_b(n);
                             Some(ColorCode {
                                 char: (i as char).to_string(),
                                 color: format!("{:02X}{:02X}{:02X}", r, g, b),
