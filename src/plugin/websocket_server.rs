@@ -15,6 +15,7 @@ use classicube_sys::Drawer2D;
 use futures::{future::RemoteHandle, stream::SplitSink, FutureExt, SinkExt, StreamExt};
 use lazy_static::lazy_static;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rayon::prelude::*;
 use serde::Serialize;
 use std::{iter, sync::Mutex};
 use tokio::net::{TcpListener, TcpStream};
@@ -178,6 +179,7 @@ async fn handle_incoming(
 
             JsonMessage::AskColorCodes => {
                 let codes = (0..=255u8)
+                    .into_par_iter()
                     .filter_map(|i| {
                         let n = unsafe { Drawer2D.Colors[i as usize] };
                         if bitmap_col_a(n) != 0 {

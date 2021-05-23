@@ -76,11 +76,11 @@ function Colored({
   return <div>{parts}</div>;
 }
 
-function Rendered({
-  text,
+function RenderedText({
+  children,
   connection,
 }: {
-  text: string;
+  children: string;
   connection: WebSocket;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -92,8 +92,8 @@ function Rendered({
 
       if (obj.type === "renderedText") {
         (async () => {
-          const { text: asdf, pixels, width, height } = obj.data;
-          if (text !== asdf) return;
+          const { text, pixels, width, height } = obj.data;
+          if (text !== children) return;
 
           const bitmap = await createImageBitmap(
             new ImageData(new Uint8ClampedArray(pixels), width, height)
@@ -110,7 +110,7 @@ function Rendered({
       }
     }
     connection.addEventListener("message", listener);
-    send(connection, { type: "renderText", data: text });
+    send(connection, { type: "renderText", data: children });
 
     return () => {
       connection.removeEventListener("message", listener);
@@ -131,7 +131,9 @@ export function TabList({ connection }: { connection: WebSocket }) {
           <MenuItem
             key={id}
             title={p.realName}
-            text={<Rendered text={p.nickName} connection={connection} />}
+            text={
+              <RenderedText connection={connection}>{p.nickName}</RenderedText>
+            }
             label={p.group}
             popoverProps={{
               interactionKind: PopoverInteractionKind.CLICK,

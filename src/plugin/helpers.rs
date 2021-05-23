@@ -3,6 +3,7 @@ use classicube_sys::{
     Bitmap, DrawTextArgs, Drawer2D_DrawText, Drawer2D_MakeFont, Drawer2D_TextHeight,
     Drawer2D_TextWidth, FontDesc, OwnedString, FONT_FLAGS_FONT_FLAGS_NONE,
 };
+use rayon::prelude::*;
 use std::{cell::RefCell, mem};
 
 const BITMAPCOL_B_SHIFT: u8 = 0;
@@ -63,13 +64,17 @@ pub fn make_text_bitmap(text: &str) -> Result<(Vec<u8>, usize, usize)> {
         // make sure buffer lasts long enough
         drop(s);
 
-        let mut vec8: Vec<u8> = Vec::with_capacity(pixels.len() * 4);
-        for n in pixels {
-            vec8.push(bitmap_col_r(n));
-            vec8.push(bitmap_col_g(n));
-            vec8.push(bitmap_col_b(n));
-            vec8.push(bitmap_col_a(n));
-        }
+        let vec8 = pixels
+            .par_iter()
+            .flat_map(|&n| {
+                [
+                    bitmap_col_r(n),
+                    bitmap_col_g(n),
+                    bitmap_col_b(n),
+                    bitmap_col_a(n),
+                ]
+            })
+            .collect::<Vec<u8>>();
 
         Ok((vec8, width, height))
     })
