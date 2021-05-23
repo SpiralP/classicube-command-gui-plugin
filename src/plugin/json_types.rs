@@ -24,6 +24,8 @@ pub enum JsonEvent {
     ColorCodes(Vec<ColorCode>),
     RenderedText {
         text: String,
+        size: u8,
+        shadow: bool,
         // R G B A order
         pixels: Vec<u8>,
         width: usize,
@@ -45,5 +47,9 @@ pub enum JsonMessage {
     ChatCommand(String),
     TabListSubscribe,
     AskColorCodes,
-    RenderText(String),
+    RenderText {
+        text: String,
+        size: u8,
+        shadow: bool,
+    },
 }

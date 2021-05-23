@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { ConnectionArgs, JsonEvent, JsonMessage } from "./types";
 
 export class Connection {
@@ -29,7 +29,10 @@ export class Connection {
   }
 }
 
-export function useConnection(connectionArgs?: ConnectionArgs) {
+export const ConnectionContext =
+  createContext<Connection | undefined>(undefined);
+
+export function useSetupConnection(connectionArgs?: ConnectionArgs) {
   const [connection, setConnection] =
     useState<Connection | undefined>(undefined);
 
@@ -57,19 +60,19 @@ export function useConnection(connectionArgs?: ConnectionArgs) {
     ws.addEventListener("close", () => {
       ws.close();
       setConnection(undefined);
-      window.close();
+      // window.close();
     });
     ws.addEventListener("error", () => {
       ws.close();
       setConnection(undefined);
-      window.close();
+      // window.close();
     });
 
     return () => {
       ws.close();
       setConnection(undefined);
     };
-  }, [connection, connectionArgs]);
+  }, [connectionArgs]);
 
   return connection;
 }

@@ -7,9 +7,10 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "node build.js",
-    "watch": "nodemon -e tsx -x \"yarn build\"",
+    "watch": "nodemon -e ts,tsx -x \"yarn build\"",
     "serve": "http-server -a 127.0.0.1 -p 8080 dist",
-    "dev": "concurrently yarn:serve yarn:watch"
+    "dev": "concurrently yarn:serve yarn:watch",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@blueprintjs/core": "^3.31.0",

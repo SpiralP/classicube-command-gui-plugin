@@ -10,7 +10,11 @@ interface AskColorCodesJsonMessage {
 }
 interface RenderTextJsonMessage {
   type: "renderText";
-  data: string;
+  data: {
+    text: string;
+    size: number;
+    shadow: boolean;
+  };
 }
 
 export type JsonMessage =

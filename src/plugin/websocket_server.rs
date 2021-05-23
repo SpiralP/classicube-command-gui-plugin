@@ -7,12 +7,13 @@ use crate::{
     async_manager, chat,
     error::*,
     plugin::{
-        helpers::{bitmap_col_b, bitmap_col_g, bitmap_col_r, make_text_bitmap},
+        helpers::{bitmap_col_b, bitmap_col_g, bitmap_col_r},
         json_types::ColorCode,
+        render_text::make_text_bitmap,
     },
 };
 use classicube_sys::Drawer2D;
-use futures::{future::RemoteHandle, stream::SplitSink, FutureExt, SinkExt, StreamExt};
+use futures::{channel::mpsc, future::RemoteHandle, FutureExt, SinkExt, StreamExt};
 use lazy_static::lazy_static;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use rayon::prelude::*;
@@ -114,20 +115,37 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
     let (mut connection_tx, connection_rx) = ws_stream.split();
     let mut connection_rx = connection_rx.fuse();
 
+    let (event_queue_tx, event_queue_rx) = mpsc::channel::<JsonEvent>(8);
+    let mut event_queue_rx = event_queue_rx.fuse();
+
     async_manager::spawn(async move {
-        let result: Result<()> = async move {
+        if let Err(e) = async move {
             let mut player_event_subscribed = false;
             let mut player_event_listener = tab_list_events::make_new_listener().fuse();
 
             loop {
                 futures::select! {
+                    event = event_queue_rx.select_next_some() => {
+                        connection_tx
+                            .send(make_message(event)?)
+                            .await
+                            .chain_err(|| "sending message")?;
+                    }
+
                     result = connection_rx.select_next_some() => {
                         let msg = result?;
 
                         debug!("{}", msg);
 
-                        handle_incoming(msg, &mut player_event_subscribed, &mut connection_tx)
-                            .await?;
+                        if handle_incoming(
+                            msg,
+                            &mut player_event_subscribed,
+                            event_queue_tx.clone(),
+                        )
+                        .await?
+                        {
+                            break;
+                        }
                     }
 
                     result = player_event_listener.select_next_some() => {
@@ -143,10 +161,11 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
                     }
                 };
             }
-        }
-        .await;
 
-        if let Err(e) = result {
+            Ok::<_, Error>(())
+        }
+        .await
+        {
             warn!("{}", e);
         }
     });
@@ -157,9 +176,10 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
 async fn handle_incoming(
     msg: Message,
     player_event_subscribed: &mut bool,
-    connection_tx: &mut SplitSink<WebSocketStream<TcpStream>, Message>,
-) -> Result<()> {
-    if let Ok(text) = msg.into_text() {
+    mut event_queue: mpsc::Sender<JsonEvent>,
+) -> Result<bool> {
+    if msg.is_text() {
+        let text = msg.into_text()?;
         match serde_json::from_str(&text)? {
             JsonMessage::ChatCommand(text) => {
                 async_manager::spawn_on_main_thread(async move {
@@ -171,8 +191,8 @@ async fn handle_incoming(
                 let current_players = tab_list_events::get_current_players().await;
                 *player_event_subscribed = true;
 
-                connection_tx
-                    .send(make_message(JsonEvent::NewPlayers(current_players))?)
+                event_queue
+                    .send(JsonEvent::NewPlayers(current_players))
                     .await
                     .chain_err(|| "sending message")?;
             }
@@ -196,29 +216,47 @@ async fn handle_incoming(
                     })
                     .collect::<Vec<_>>();
 
-                connection_tx
-                    .send(make_message(JsonEvent::ColorCodes(codes))?)
+                event_queue
+                    .send(JsonEvent::ColorCodes(codes))
                     .await
                     .chain_err(|| "sending message")?;
             }
 
-            JsonMessage::RenderText(text) => {
-                let (pixels, width, height) = make_text_bitmap(&text)?;
+            JsonMessage::RenderText { text, size, shadow } => {
+                let mut event_queue = event_queue.clone();
+                async_manager::spawn_on_main_thread(async move {
+                    if let Err(e) = async move {
+                        let (pixels, width, height) = make_text_bitmap(&text, size, shadow)?;
 
-                connection_tx
-                    .send(make_message(JsonEvent::RenderedText {
-                        text,
-                        pixels,
-                        width,
-                        height,
-                    })?)
+                        event_queue
+                            .send(JsonEvent::RenderedText {
+                                text,
+                                size,
+                                shadow,
+                                pixels,
+                                width,
+                                height,
+                            })
+                            .await
+                            .chain_err(|| "sending message")?;
+
+                        Ok::<_, Error>(())
+                    }
                     .await
-                    .chain_err(|| "sending message")?;
+                    {
+                        warn!("{}", e);
+                    }
+                });
             }
         }
-    }
 
-    Ok(())
+        Ok(false)
+    } else if msg.is_close() {
+        debug!("{:#?}", msg);
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
 
 /*

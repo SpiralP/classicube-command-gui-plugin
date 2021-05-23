@@ -77,7 +77,19 @@ namespace MCGalaxy {
                 }
 
                 public override void Message(byte type, string message) {
-                    buffer.Add(message);
+                    // Message should start with server color if no initial color
+                    if (message.Length > 0 && !(message[0] == '&' || message[0] == '%')) {
+                        message = Server.Config.DefaultColor + message;
+                    }
+                    message = Chat.Format(message, this);
+
+                    try {
+                        message = LineWrapper.CleanupColors(message, this);
+
+                        buffer.Add(message);
+                    } catch (Exception e) {
+                        Logger.LogError(e);
+                    }
                 }
             }
         }

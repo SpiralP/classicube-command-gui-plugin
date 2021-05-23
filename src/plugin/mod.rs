@@ -4,6 +4,7 @@ mod command;
 mod helpers;
 mod json_types;
 mod map_url_listener;
+mod render_text;
 mod tab_list_events;
 mod websocket_server;
 

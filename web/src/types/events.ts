@@ -29,6 +29,8 @@ interface RenderedTextJsonEvent {
   type: "renderedText";
   data: {
     text: string;
+    size: number;
+    shadow: boolean;
     /**
      * R G B A order
      */

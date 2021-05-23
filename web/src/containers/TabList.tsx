@@ -1,7 +1,7 @@
 import { Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { RenderedText } from "../components/RenderedText";
-import { Connection } from "../Connection";
+import { Connection, ConnectionContext } from "../Connection";
 import { JsonEvent, JsonPlayer } from "../types";
 
 export function usePlayers({
@@ -43,7 +43,10 @@ export function usePlayers({
   return [players, colorCodes];
 }
 
-export function TabList({ connection }: { connection: Connection }) {
+export function TabList() {
+  const connection = useContext(ConnectionContext);
+  if (!connection) throw new Error("!connection");
+
   const [players] = usePlayers({ connection });
 
   const tpOnClick = (p: JsonPlayer) => () => {
@@ -54,26 +57,22 @@ export function TabList({ connection }: { connection: Connection }) {
   };
 
   return (
-    <div>
-      <Menu>
-        {Object.entries(players).map(([id, p]) => (
-          <MenuItem
-            key={id}
-            title={p.realName}
-            text={
-              <RenderedText connection={connection}>{p.nickName}</RenderedText>
-            }
-            label={p.group}
-            popoverProps={{
-              interactionKind: PopoverInteractionKind.CLICK,
-            }}
-          >
-            <MenuItem text="TP" onClick={tpOnClick(p)} />
-            <MenuItem text="Child two" />
-            <MenuItem text="Child three" />
-          </MenuItem>
-        ))}
-      </Menu>
-    </div>
+    <Menu>
+      {Object.entries(players).map(([id, p]) => (
+        <MenuItem
+          key={id}
+          title={p.realName}
+          text={<RenderedText>{p.nickName}</RenderedText>}
+          labelElement={<RenderedText size={12}>{p.group}</RenderedText>}
+          popoverProps={{
+            interactionKind: PopoverInteractionKind.CLICK,
+          }}
+        >
+          <MenuItem text="TP" onClick={tpOnClick(p)} />
+          <MenuItem text="Child two" />
+          <MenuItem text="Child three" />
+        </MenuItem>
+      ))}
+    </Menu>
   );
 }

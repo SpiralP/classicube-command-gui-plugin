@@ -95,7 +95,7 @@ fn got_url(url: String) {
     debug!("map url {:?}", url);
 
     async_manager::spawn(async move {
-        let result = async move {
+        if let Err(e) = async move {
             let stream = reqwest::get(url)
                 .await?
                 .bytes_stream()
@@ -128,9 +128,9 @@ fn got_url(url: String) {
             .await??;
 
             Ok::<_, Error>(())
-        };
-
-        if let Err(e) = result.await {
+        }
+        .await
+        {
             warn!("{}", e);
         }
     });
