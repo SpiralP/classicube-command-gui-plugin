@@ -34,6 +34,25 @@ function useCommands() {
   return commands;
 }
 
+function CommandCard({ command }: { command: CommandInfo & { name: string } }) {
+  const { name, help } = command;
+
+  return (
+    <Card interactive key={name}>
+      <H5>
+        <RenderedText>{name}</RenderedText>
+      </H5>
+
+      {help.map((line, i) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <p key={i} style={{ margin: 0, overflow: "hidden" }}>
+          <RenderedText shadow>{line}</RenderedText>
+        </p>
+      ))}
+    </Card>
+  );
+}
+
 export function Commands() {
   const connection = useContext(ConnectionContext);
   const commands = useCommands();
@@ -46,14 +65,7 @@ export function Commands() {
     <>
       {commands ? (
         Object.entries(commands).map(([name, info]) => (
-          <Card interactive key={name}>
-            <H5>
-              <RenderedText>{name}</RenderedText>
-            </H5>
-            <p>
-              <RenderedText>{info.help[0]}</RenderedText>
-            </p>
-          </Card>
+          <CommandCard key={name} command={{ ...info, name }} />
         ))
       ) : (
         <Spinner />

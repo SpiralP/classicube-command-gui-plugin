@@ -1,6 +1,48 @@
+import memoizee from "memoizee";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { ConnectionContext } from "../Connection";
-import { JsonEvent } from "../types";
+import { useInView } from "react-intersection-observer";
+import { Connection, ConnectionContext } from "../Connection";
+import { JsonEvent, RenderTextJsonMessage } from "../types";
+
+const renderText = memoizee(
+  async (
+    { text, size, shadow }: RenderTextJsonMessage["data"],
+    connection: Connection
+  ): Promise<ImageData> => {
+    return new Promise((resolve) => {
+      function listener(obj: JsonEvent) {
+        if (obj.type === "renderedText") {
+          const {
+            text: text2,
+            size: size2,
+            shadow: shadow2,
+            pixels,
+            width,
+            height,
+          } = obj.data;
+          if (text !== text2 || size !== size2 || shadow !== shadow2) return;
+          connection.removeListener(listener);
+
+          const imageData = new ImageData(
+            new Uint8ClampedArray(pixels),
+            width,
+            height
+          );
+
+          resolve(imageData);
+        }
+      }
+      connection.addListener(listener);
+      connection.send({ type: "renderText", data: { text, size, shadow } });
+    });
+  },
+  {
+    promise: true,
+    normalizer(args) {
+      return JSON.stringify(args[0]);
+    },
+  }
+);
 
 export function RenderedText({
   size = 16,
@@ -14,55 +56,53 @@ export function RenderedText({
   const connection = useContext(ConnectionContext);
   const ref = useRef<HTMLCanvasElement>(null);
   const [rendered, setRendered] = useState(false);
+  const { ref: containerRef, inView } = useInView();
 
   useEffect(() => {
-    if (!connection) return undefined;
+    if (rendered || !connection || !inView) return undefined;
 
     const text = children.startsWith("&") ? children : `&0${children}`;
-    function listener(obj: JsonEvent) {
-      if (obj.type === "renderedText") {
-        (async () => {
-          const {
-            text: text2,
-            size: size2,
-            shadow: shadow2,
-            pixels,
-            width,
-            height,
-          } = obj.data;
-          if (text !== text2 || size !== size2 || shadow !== shadow2) return;
 
-          const bitmap = await createImageBitmap(
-            new ImageData(new Uint8ClampedArray(pixels), width, height)
-          );
+    let cancel = false;
 
-          const canvas = ref.current;
-          if (!canvas) throw new Error("!canvas");
-          const context = canvas.getContext("bitmaprenderer");
-          if (!context) throw new Error("!context");
-          context.transferFromImageBitmap(bitmap);
-          canvas.width = width;
-          canvas.height = height;
+    (async () => {
+      const imageData = await renderText({ text, size, shadow }, connection);
+      if (cancel) return;
+      const bitmap = await createImageBitmap(imageData);
+      if (cancel) return;
 
-          setRendered(true);
-        })();
-      }
-    }
-    connection.addListener(listener);
-    connection.send({ type: "renderText", data: { text, size, shadow } });
+      const canvas = ref.current;
+      if (!canvas) throw new Error("!canvas");
+      const context = canvas.getContext("bitmaprenderer");
+      if (!context) throw new Error("!context");
+      context.transferFromImageBitmap(bitmap);
+      canvas.width = imageData.width;
+      canvas.height = imageData.height;
+
+      setRendered(true);
+    })();
 
     return () => {
-      connection.removeListener(listener);
+      cancel = true;
     };
-  }, [children, connection, shadow, size]);
+  }, [children, connection, inView, rendered, shadow, size]);
 
   if (!connection) {
     return <span>{children}</span>;
   }
   return (
-    <span>
-      {rendered ? null : children}
-      <canvas ref={ref} />
-    </span>
+    <div ref={containerRef}>
+      {rendered ? null : <span>{children}</span>}
+      <canvas
+        ref={ref}
+        style={
+          rendered
+            ? undefined
+            : {
+                display: "none",
+              }
+        }
+      />
+    </div>
   );
 }

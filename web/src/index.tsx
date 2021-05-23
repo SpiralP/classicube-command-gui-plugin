@@ -13,7 +13,7 @@ try {
   //   window.location.pathname + window.location.search
   // );
 } catch (e) {
-  console.error(e);
+  console.warn(e);
 }
 
 ReactDOM.render(<App connectionArgs={args} />, document.getElementById("root"));

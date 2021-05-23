@@ -115,7 +115,7 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
     let (mut connection_tx, connection_rx) = ws_stream.split();
     let mut connection_rx = connection_rx.fuse();
 
-    let (event_queue_tx, event_queue_rx) = mpsc::channel::<JsonEvent>(8);
+    let (event_queue_tx, event_queue_rx) = mpsc::channel::<JsonEvent>(256);
     let mut event_queue_rx = event_queue_rx.fuse();
 
     async_manager::spawn(async move {
@@ -135,8 +135,6 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
                     result = connection_rx.select_next_some() => {
                         let msg = result?;
 
-                        debug!("{}", msg);
-
                         if handle_incoming(
                             msg,
                             &mut player_event_subscribed,
@@ -151,7 +149,6 @@ fn spawn_connection(ws_stream: WebSocketStream<TcpStream>) -> Result<()> {
                     result = player_event_listener.select_next_some() => {
                         if player_event_subscribed {
                             let event = result.chain_err(|| "BroadcastStreamRecvError")?;
-                            debug!("{:#?}", event);
 
                             connection_tx
                                 .send(make_message(event)?)

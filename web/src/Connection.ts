@@ -43,14 +43,11 @@ export function useSetupConnection(connectionArgs?: ConnectionArgs) {
       `ws://127.0.0.1:${connectionArgs.port}/${connectionArgs.path}`
     );
     ws.addEventListener("open", () => {
-      console.log("connected!");
-
       const newConnection = new Connection(ws);
       ws.addEventListener("message", ({ data }) => {
         if (typeof data !== "string") return;
 
         const event = JSON.parse(data);
-        console.log(event);
         newConnection.handleEvent(event);
       });
 

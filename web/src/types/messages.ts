@@ -1,14 +1,14 @@
-interface ChatCommandJsonMessage {
+export interface ChatCommandJsonMessage {
   type: "chatCommand";
   data: string;
 }
-interface TabListSubscribeJsonMessage {
+export interface TabListSubscribeJsonMessage {
   type: "tabListSubscribe";
 }
-interface AskColorCodesJsonMessage {
+export interface AskColorCodesJsonMessage {
   type: "askColorCodes";
 }
-interface RenderTextJsonMessage {
+export interface RenderTextJsonMessage {
   type: "renderText";
   data: {
     text: string;

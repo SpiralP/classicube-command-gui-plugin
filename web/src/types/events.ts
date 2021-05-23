@@ -1,31 +1,31 @@
 import { ColorCode, JsonPlayer } from "./other";
 
-interface NewPlayersJsonEvent {
+export interface NewPlayersJsonEvent {
   type: "newPlayers";
   data: JsonPlayer[];
 }
-interface PlayerAddedJsonEvent {
+export interface PlayerAddedJsonEvent {
   type: "playerAdded";
   data: JsonPlayer;
 }
-interface PlayerRemovedJsonEvent {
+export interface PlayerRemovedJsonEvent {
   type: "playerRemoved";
   data: {
     id: number;
   };
 }
-interface PlayerChangedJsonEvent {
+export interface PlayerChangedJsonEvent {
   type: "playerChanged";
   data: JsonPlayer;
 }
-interface WeDisconnectedJsonEvent {
+export interface WeDisconnectedJsonEvent {
   type: "weDisconnected";
 }
-interface ColorCodesJsonEvent {
+export interface ColorCodesJsonEvent {
   type: "colorCodes";
   data: ColorCode[];
 }
-interface RenderedTextJsonEvent {
+export interface RenderedTextJsonEvent {
   type: "renderedText";
   data: {
     text: string;
