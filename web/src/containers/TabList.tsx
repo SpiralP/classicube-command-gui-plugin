@@ -2,6 +2,7 @@ import { Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
 import { RenderedText } from "../components/RenderedText";
 import { Connection } from "../Connection";
+import { JsonEvent, JsonPlayer } from "../types";
 
 export function usePlayers({
   connection,
@@ -16,10 +17,10 @@ export function usePlayers({
       if (obj.type === "newPlayers") {
         setPlayers(Object.fromEntries(obj.data.map((p) => [p.id, p])));
       } else if (obj.type === "playerAdded" || obj.type === "playerChanged") {
-        setPlayers((players) => ({ ...players, [obj.data.id]: obj.data }));
+        setPlayers((prev) => ({ ...prev, [obj.data.id]: obj.data }));
       } else if (obj.type === "playerRemoved") {
-        setPlayers((players) => {
-          const o = { ...players };
+        setPlayers((prev) => {
+          const o = { ...prev };
           delete o[obj.data.id];
           return o;
         });
@@ -37,17 +38,23 @@ export function usePlayers({
     return () => {
       connection.removeListener(listener);
     };
-  }, []);
+  }, [connection]);
 
   return [players, colorCodes];
 }
 
 export function TabList({ connection }: { connection: Connection }) {
-  const [players, colorCodes] = usePlayers({ connection });
+  const [players] = usePlayers({ connection });
+
+  const tpOnClick = (p: JsonPlayer) => () => {
+    connection.send({
+      type: "chatCommand",
+      data: `TP ${p.realName}`,
+    });
+  };
 
   return (
     <div>
-      {/* <Rendered text="h&cell&ao" connection={connection} /> */}
       <Menu>
         {Object.entries(players).map(([id, p]) => (
           <MenuItem
@@ -61,15 +68,7 @@ export function TabList({ connection }: { connection: Connection }) {
               interactionKind: PopoverInteractionKind.CLICK,
             }}
           >
-            <MenuItem
-              text="TP"
-              onClick={() => {
-                connection.send({
-                  type: "chatCommand",
-                  data: `TP ${p.realName}`,
-                });
-              }}
-            />
+            <MenuItem text="TP" onClick={tpOnClick(p)} />
             <MenuItem text="Child two" />
             <MenuItem text="Child three" />
           </MenuItem>

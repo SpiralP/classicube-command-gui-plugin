@@ -1,27 +1,6 @@
-import { Card, Spinner } from "@blueprintjs/core";
+import { Card, H5, Spinner } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
 import { Connection } from "../Connection";
-
-export function Commands({ connection }: { connection?: Connection }) {
-  const commands = useCommands();
-
-  return (
-    <>
-      {commands ? (
-        <div>
-          {Object.entries(commands).map(([name, info]) => (
-            <Card interactive>
-              <h5>{name}</h5>
-              <p>{info.type}</p>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Spinner />
-      )}
-    </>
-  );
-}
 
 interface CommandInfo {
   type: string;
@@ -39,11 +18,11 @@ function useCommands() {
 
     (async () => {
       const response = await fetch("/commands.json");
-      const commands: Record<string, CommandInfo> = await response.json();
+      const obj: Record<string, CommandInfo> = await response.json();
 
       if (cancel) return;
 
-      setCommands(commands);
+      setCommands(obj);
     })();
 
     return () => {
@@ -52,4 +31,29 @@ function useCommands() {
   }, []);
 
   return commands;
+}
+
+export function Commands({ connection }: { connection?: Connection }) {
+  const commands = useCommands();
+
+  connection?.addListener(() => {
+    //
+  });
+
+  return (
+    <>
+      {commands ? (
+        <div>
+          {Object.entries(commands).map(([name, info]) => (
+            <Card interactive key={name}>
+              <H5>{name}</H5>
+              <p>{info.type}</p>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Spinner />
+      )}
+    </>
+  );
 }

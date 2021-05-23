@@ -1,41 +1,4 @@
-interface ConnectionArgs {
-  port: number;
-  path: string;
-}
-
-interface ChatCommandJsonMessage {
-  type: "chatCommand";
-  data: string;
-}
-interface TabListSubscribeJsonMessage {
-  type: "tabListSubscribe";
-}
-interface AskColorCodesJsonMessage {
-  type: "askColorCodes";
-}
-interface RenderTextJsonMessage {
-  type: "renderText";
-  data: string;
-}
-
-type JsonMessage =
-  | ChatCommandJsonMessage
-  | TabListSubscribeJsonMessage
-  | AskColorCodesJsonMessage
-  | RenderTextJsonMessage;
-
-interface JsonPlayer {
-  id: number;
-  realName: string;
-  nickName: string;
-  group: string;
-  rank: number;
-}
-
-interface ColorCode {
-  char: string;
-  color: string;
-}
+import { ColorCode, JsonPlayer } from "./other";
 
 interface NewPlayersJsonEvent {
   type: "newPlayers";
@@ -75,7 +38,7 @@ interface RenderedTextJsonEvent {
   };
 }
 
-type JsonEvent =
+export type JsonEvent =
   | NewPlayersJsonEvent
   | PlayerAddedJsonEvent
   | PlayerRemovedJsonEvent

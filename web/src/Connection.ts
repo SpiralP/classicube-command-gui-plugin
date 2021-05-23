@@ -1,25 +1,28 @@
 import { useEffect, useState } from "react";
+import { ConnectionArgs, JsonEvent, JsonMessage } from "./types";
 
 export class Connection {
-  ws: WebSocket;
-  listeners: Set<(message: JsonEvent) => void> = new Set();
+  private ws: WebSocket;
+
+  private listeners: Set<(event: JsonEvent) => void> = new Set();
+
   constructor(ws: WebSocket) {
     this.ws = ws;
   }
 
-  send(message: JsonMessage) {
+  public send(message: JsonMessage) {
     return this.ws.send(JSON.stringify(message));
   }
 
-  addListener(listener: (message: JsonEvent) => void) {
+  public addListener(listener: (event: JsonEvent) => void) {
     this.listeners.add(listener);
   }
 
-  removeListener(listener: (message: JsonEvent) => void) {
+  public removeListener(listener: (event: JsonEvent) => void) {
     this.listeners.delete(listener);
   }
 
-  handleEvent(event: JsonEvent) {
+  public handleEvent(event: JsonEvent) {
     this.listeners.forEach((listener) => {
       listener(event);
     });
@@ -31,7 +34,7 @@ export function useConnection(connectionArgs?: ConnectionArgs) {
     useState<Connection | undefined>(undefined);
 
   useEffect(() => {
-    if (!connectionArgs) return;
+    if (!connectionArgs) return undefined;
 
     const ws = new WebSocket(
       `ws://127.0.0.1:${connectionArgs.port}/${connectionArgs.path}`
@@ -39,14 +42,16 @@ export function useConnection(connectionArgs?: ConnectionArgs) {
     ws.addEventListener("open", () => {
       console.log("connected!");
 
-      setConnection(new Connection(ws));
-    });
-    ws.addEventListener("message", ({ data }) => {
-      if (!connection || typeof data !== "string") return;
+      const newConnection = new Connection(ws);
+      ws.addEventListener("message", ({ data }) => {
+        if (typeof data !== "string") return;
 
-      const event = JSON.parse(data);
-      console.log(event);
-      connection.handleEvent(event);
+        const event = JSON.parse(data);
+        console.log(event);
+        newConnection.handleEvent(event);
+      });
+
+      setConnection(newConnection);
     });
 
     ws.addEventListener("close", () => {
@@ -64,7 +69,7 @@ export function useConnection(connectionArgs?: ConnectionArgs) {
       ws.close();
       setConnection(undefined);
     };
-  }, []);
+  }, [connection, connectionArgs]);
 
   return connection;
 }

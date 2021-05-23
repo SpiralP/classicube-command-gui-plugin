@@ -10,25 +10,24 @@ export function Colored({
   const parts: JSX.Element[] = [];
   let hadCodeSymbol = false;
   let currentColor = "000000";
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
+  text.split("").forEach((c) => {
     if (c === "&") {
       hadCodeSymbol = true;
-      continue;
+      return;
     }
     if (hadCodeSymbol) {
       hadCodeSymbol = false;
       const color = colorCodes[c];
       if (color) {
         currentColor = color;
-        continue;
+        return;
       }
     }
 
     parts.push(
       <span style={{ fontWeight: "bold", color: `#${currentColor}` }}>{c}</span>
     );
-  }
+  });
 
   return <div>{parts}</div>;
 }

@@ -1,14 +1,11 @@
 import { NonIdealState } from "@blueprintjs/core";
 import React from "react";
 import { useConnection } from "../Connection";
+import { ConnectionArgs } from "../types";
 import { Commands } from "./Commands";
 import { TabList } from "./TabList";
 
-export default function App({
-  connectionArgs,
-}: {
-  connectionArgs?: ConnectionArgs;
-}) {
+export function App({ connectionArgs }: { connectionArgs?: ConnectionArgs }) {
   const connection = useConnection(connectionArgs);
 
   return (

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Connection } from "../Connection";
+import { JsonEvent } from "../types";
 
 export function RenderedText({
   children,
@@ -37,7 +38,7 @@ export function RenderedText({
     return () => {
       connection.removeListener(listener);
     };
-  }, []);
+  }, [children, connection]);
 
   return <canvas ref={ref} />;
 }
