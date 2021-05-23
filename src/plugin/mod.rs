@@ -1,5 +1,6 @@
 use crate::{async_manager, error::Result};
 
+mod chat_parser;
 mod command;
 mod helpers;
 mod json_types;
@@ -13,13 +14,19 @@ pub fn init() {
 
     map_url_listener::init();
     tab_list_events::init();
+    chat_parser::init();
 
     command::init();
+}
+
+pub fn reset() {
+    chat_parser::reset();
 }
 
 pub fn free() {
     command::free();
 
+    chat_parser::free();
     tab_list_events::free();
     map_url_listener::free();
 

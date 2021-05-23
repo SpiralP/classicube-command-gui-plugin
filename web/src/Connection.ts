@@ -51,6 +51,9 @@ export function useSetupConnection(connectionArgs?: ConnectionArgs) {
         newConnection.handleEvent(event);
       });
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      window.connection = newConnection;
       setConnection(newConnection);
     });
 

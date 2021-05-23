@@ -23,16 +23,19 @@ extern "C" fn init() {
     })
 }
 
+#[tracing::instrument]
 extern "C" fn free() {
-    tracing::debug_span!("free").in_scope(|| {
-        debug!("Free");
+    debug!("Free");
 
-        plugin::free();
-    });
+    plugin::free();
 }
 
 #[tracing::instrument]
-extern "C" fn reset() {}
+extern "C" fn reset() {
+    debug!("Reset");
+
+    plugin::reset();
+}
 
 #[tracing::instrument]
 extern "C" fn on_new_map() {}

@@ -1,4 +1,5 @@
 use super::{
+    chat_parser,
     helpers::bitmap_col_a,
     json_types::{JsonEvent, JsonMessage},
     tab_list_events,
@@ -29,7 +30,7 @@ use tokio_tungstenite::{
     },
     WebSocketStream,
 };
-use tracing::{debug, warn};
+use tracing::*;
 
 #[derive(Serialize)]
 pub struct ConnectionArgs {
@@ -217,6 +218,25 @@ async fn handle_incoming(
                     .send(JsonEvent::ColorCodes(codes))
                     .await
                     .chain_err(|| "sending message")?;
+            }
+
+            JsonMessage::AskRanks => {
+                async_manager::spawn_on_main_thread(async move {
+                    if let Err(e) = async move {
+                        let ranks = chat_parser::ranks::execute().await?;
+
+                        event_queue
+                            .send(JsonEvent::Ranks(ranks))
+                            .await
+                            .chain_err(|| "sending message")?;
+
+                        Ok::<_, Error>(())
+                    }
+                    .await
+                    {
+                        warn!("{}", e);
+                    }
+                });
             }
 
             JsonMessage::RenderText { text, size, shadow } => {

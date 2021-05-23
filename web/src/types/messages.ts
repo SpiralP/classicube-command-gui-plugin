@@ -16,9 +16,13 @@ export interface RenderTextJsonMessage {
     shadow: boolean;
   };
 }
+export interface AskRanksJsonMessage {
+  type: "askRanks";
+}
 
 export type JsonMessage =
   | ChatCommandJsonMessage
   | TabListSubscribeJsonMessage
   | AskColorCodesJsonMessage
+  | AskRanksJsonMessage
   | RenderTextJsonMessage;

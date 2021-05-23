@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::chat_parser::ranks::Rank;
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JsonPlayer {
@@ -31,6 +33,7 @@ pub enum JsonEvent {
         width: usize,
         height: usize,
     },
+    Ranks(Vec<Rank>),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -47,6 +50,7 @@ pub enum JsonMessage {
     ChatCommand(String),
     TabListSubscribe,
     AskColorCodes,
+    AskRanks,
     RenderText {
         text: String,
         size: u8,

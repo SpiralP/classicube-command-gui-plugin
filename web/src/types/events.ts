@@ -39,6 +39,16 @@ export interface RenderedTextJsonEvent {
     height: number;
   };
 }
+export interface RanksJsonMessage {
+  type: "ranks";
+  data: {
+    colorCode: string;
+    rankName: string;
+    drawLimit: number;
+    permission: number;
+    maxRealms: number;
+  };
+}
 
 export type JsonEvent =
   | NewPlayersJsonEvent
@@ -47,4 +57,5 @@ export type JsonEvent =
   | PlayerChangedJsonEvent
   | WeDisconnectedJsonEvent
   | ColorCodesJsonEvent
-  | RenderedTextJsonEvent;
+  | RenderedTextJsonEvent
+  | RanksJsonMessage;
