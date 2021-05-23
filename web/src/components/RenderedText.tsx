@@ -87,9 +87,6 @@ export function RenderedText({
     };
   }, [children, connection, inView, rendered, shadow, size]);
 
-  if (!connection) {
-    return <span>{children}</span>;
-  }
   return (
     <div ref={containerRef}>
       {rendered ? null : <span>{children}</span>}

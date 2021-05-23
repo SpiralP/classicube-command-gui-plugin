@@ -41,13 +41,14 @@ export interface RenderedTextJsonEvent {
 }
 export interface RanksJsonMessage {
   type: "ranks";
-  data: {
-    colorCode: string;
-    rankName: string;
-    drawLimit: number;
-    permission: number;
-    maxRealms: number;
-  };
+  data: Rank[];
+}
+export interface Rank {
+  colorCode: string;
+  rankName: string;
+  drawLimit: number;
+  permission: number;
+  maxRealms: number;
 }
 
 export type JsonEvent =

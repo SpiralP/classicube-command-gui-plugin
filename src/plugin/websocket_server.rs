@@ -187,6 +187,7 @@ async fn handle_incoming(
 
             JsonMessage::TabListSubscribe => {
                 let current_players = tab_list_events::get_current_players().await;
+                info!("{:#?}", current_players);
                 *player_event_subscribed = true;
 
                 event_queue
@@ -224,6 +225,8 @@ async fn handle_incoming(
                 async_manager::spawn_on_main_thread(async move {
                     if let Err(e) = async move {
                         let ranks = chat_parser::ranks::execute().await?;
+
+                        info!("{:#?}", ranks);
 
                         event_queue
                             .send(JsonEvent::Ranks(ranks))

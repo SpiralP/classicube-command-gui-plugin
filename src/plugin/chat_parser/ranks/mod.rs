@@ -9,6 +9,7 @@ use serde::Serialize;
 use std::{collections::HashMap, time::Duration};
 
 #[derive(Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct Rank {
     pub color_code: char,
     pub rank_name: String,
