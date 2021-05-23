@@ -15,3 +15,23 @@ export interface ColorCode {
   char: string;
   color: string;
 }
+
+export interface CommandInfo {
+  name: string;
+  type: string;
+  shortcut: string | null;
+  defaultRank: number;
+  help: string[];
+  aliases: CommandInfoAlias[];
+  extraPerms: CommandInfoPerm[];
+}
+
+export interface CommandInfoAlias {
+  trigger: string;
+  format: string;
+}
+
+export interface CommandInfoPerm {
+  perm: string;
+  description: string;
+}

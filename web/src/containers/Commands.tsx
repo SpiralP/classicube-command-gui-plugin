@@ -2,13 +2,7 @@ import { Card, H5, Spinner } from "@blueprintjs/core";
 import React, { useContext, useEffect, useState } from "react";
 import { RenderedText } from "../components/RenderedText";
 import { ConnectionContext } from "../Connection";
-
-interface CommandInfo {
-  type: string;
-  shortcut: string;
-  defaultRank: string;
-  help: string[];
-}
+import { CommandInfo } from "../types";
 
 function useCommands() {
   const [commands, setCommands] =

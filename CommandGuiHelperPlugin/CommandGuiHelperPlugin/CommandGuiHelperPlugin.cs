@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using MCGalaxy.Config;
+using MCGalaxy.Commands;
+using System.Linq;
 
 namespace MCGalaxy {
     public sealed partial class CommandGuiHelperPlugin : Plugin {
@@ -35,10 +37,22 @@ namespace MCGalaxy {
             }
 
             struct CommandInfo {
+                public string name;
                 public string type;
                 public string shortcut;
-                public string defaultRank;
-                public List<string> help;
+                public LevelPermission defaultRank;
+                public string[] help;
+                public Alias[] aliases;
+                public Perm[] extraPerms;
+
+                public struct Alias {
+                    public string trigger, format;
+                }
+
+                public struct Perm {
+                    public LevelPermission perm;
+                    public string description;
+                }
             }
 
             public override void Use(Player p, string message, CommandData data) {
@@ -51,11 +65,30 @@ namespace MCGalaxy {
 
                     command.Help(bufferPlayer);
 
+                    var aliases = command.Aliases != null
+                        ? command.Aliases.Select(alias =>
+                            new CommandInfo.Alias {
+                                trigger = alias.Trigger,
+                                format = alias.Format
+                            }).ToArray()
+                        : new CommandInfo.Alias[] { };
+
+                    var extraPerms = command.ExtraPerms != null
+                        ? command.ExtraPerms.Select(perm =>
+                            new CommandInfo.Perm {
+                                perm = perm.Perm,
+                                description = perm.Description
+                            }).ToArray()
+                        : new CommandInfo.Perm[] { };
+
                     CommandInfo info = new CommandInfo {
+                        name = command.name,
                         type = command.type,
-                        shortcut = command.shortcut,
-                        defaultRank = command.defaultRank.ToString(),
-                        help = bufferPlayer.buffer,
+                        shortcut = command.shortcut == "" ? null : command.shortcut,
+                        defaultRank = command.defaultRank,
+                        help = bufferPlayer.buffer.ToArray(),
+                        aliases = aliases,
+                        extraPerms = extraPerms,
                     };
 
                     dict.Add(command.name, info);
