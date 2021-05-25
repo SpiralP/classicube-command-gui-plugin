@@ -99,7 +99,11 @@ function PlayerMenuItem({
     <MenuItem
       title={p.realName}
       text={<RenderedText>{p.nickName}</RenderedText>}
-      labelElement={<RenderedText size={12}>{p.group}</RenderedText>}
+      labelElement={
+        <RenderedText size={12} shadow={false}>
+          {p.group}
+        </RenderedText>
+      }
       popoverProps={{
         interactionKind: PopoverInteractionKind.CLICK,
       }}

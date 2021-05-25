@@ -34,7 +34,7 @@ function CommandCard({ command }: { command: CommandInfo & { name: string } }) {
   return (
     <Card interactive key={name}>
       <H5>
-        <RenderedText>{name}</RenderedText>
+        <RenderedText shadow={false}>{name}</RenderedText>
       </H5>
 
       {help.map((line, i) => (

@@ -33,7 +33,20 @@ export function App({ connectionArgs }: { connectionArgs?: ConnectionArgs }) {
           {connection ? (
             <TabList />
           ) : (
-            <NonIdealState title="No connection" icon="offline" />
+            <>
+              <style>
+                {`
+                  .non-ideal {
+                    justify-content: normal;
+                  }
+                `}
+              </style>
+              <NonIdealState
+                className="non-ideal"
+                title="No connection"
+                icon="offline"
+              />
+            </>
           )}
         </div>
       </div>

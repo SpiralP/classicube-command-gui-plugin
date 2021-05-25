@@ -46,7 +46,7 @@ const renderText = memoizee(
 
 export function RenderedText({
   size = 16,
-  shadow = false,
+  shadow = true,
   children,
 }: {
   size?: number;
