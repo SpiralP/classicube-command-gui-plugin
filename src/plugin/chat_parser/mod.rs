@@ -1,3 +1,4 @@
+pub mod block_props;
 pub mod blocks;
 mod helpers;
 pub mod ranks;

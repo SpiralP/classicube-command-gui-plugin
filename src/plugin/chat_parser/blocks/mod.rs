@@ -38,21 +38,13 @@ use self::{
     infos::{parse_basic_info_message, parse_complex_info_message},
     types::BlockProperties,
 };
-
-use super::{
-    helpers::{is_continuation_message, remove_color_left},
-    wait_for_message, SHOULD_BLOCK,
-};
+use super::{helpers::is_continuation_message, wait_for_message, SHOULD_BLOCK};
 use crate::{
     async_manager, chat,
     error::*,
-    plugin::chat_parser::blocks::{
-        helpers::{
-            is_blocks_looks_like_message, is_blocks_looks_like_none_message,
-            is_blocks_looks_like_start_message, is_blocks_properties_message,
-            is_blocks_start_message,
-        },
-        types::{BasicBlockProperties, ComplexBlockProperties},
+    plugin::chat_parser::blocks::helpers::{
+        is_blocks_looks_like_message, is_blocks_looks_like_none_message,
+        is_blocks_looks_like_start_message, is_blocks_start_message,
     },
 };
 use classicube_helpers::CellGetSet;
@@ -117,7 +109,6 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
                 .chain_err(|| "never found any 'complex info' messages for /Blocks response")?;
         }
     } else if has_looks_like {
-        // TODO looks-like can appear after complex information
         let mut found_looks_like_message = false;
         let timeout_result = async_manager::timeout(Duration::from_secs(3), async {
             loop {
@@ -151,6 +142,8 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
 
 #[test]
 fn test_execute_blocks() {
+    use self::types::{BasicBlockProperties, ComplexBlockProperties};
+
     crate::logger::initialize(true, false);
 
     let mut trials = vec![
