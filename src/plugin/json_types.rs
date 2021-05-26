@@ -1,9 +1,8 @@
-use serde::{Deserialize, Serialize};
-
 use super::{
-    chat_parser::ranks::Rank,
+    chat_parser::{blocks::BlockProperties, ranks::Rank},
     helpers::{bitmap_col_a, bitmap_col_b, bitmap_col_g, bitmap_col_r},
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,6 +37,7 @@ pub enum JsonEvent {
     },
     Ranks(Vec<Rank>),
     Blocks(Vec<JsonBlock>),
+    BlockProperties(BlockProperties),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -56,6 +56,7 @@ pub enum JsonMessage {
     AskColorCodes,
     AskRanks,
     AskBlocks,
+    AskBlockProperties(String),
     RenderText {
         text: String,
         size: u8,

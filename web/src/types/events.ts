@@ -1,4 +1,10 @@
-import { ColorCode, JsonBlock, JsonPlayer, JsonRank } from "./other";
+import {
+  ColorCode,
+  JsonBlock,
+  JsonBlockProperties,
+  JsonPlayer,
+  JsonRank,
+} from "./other";
 
 export interface NewPlayersJsonEvent {
   type: "newPlayers";
@@ -46,6 +52,10 @@ export interface RanksJsonMessage {
 export interface BlocksJsonMessage {
   type: "blocks";
   data: JsonBlock[];
+}
+export interface BlockPropertiesJsonMessage {
+  type: "blockProperties";
+  data: JsonBlockProperties;
 }
 
 export type JsonEvent =

@@ -1,7 +1,7 @@
 mod helpers;
 
 use self::helpers::{is_players_message, is_players_start_message};
-use super::{helpers::is_continuation_message, wait_for_message, SHOULD_BLOCK};
+use super::{helpers::is_continuation_message, wait_for_message, CURRENT_COMMAND, SHOULD_BLOCK};
 use crate::{async_manager, chat, error::*};
 use classicube_helpers::CellGetSet;
 use std::{collections::HashMap, time::Duration};
@@ -20,6 +20,8 @@ pub struct Player {
 }
 
 pub async fn execute() -> Result<HashMap<Rank, Vec<Player>>> {
+    let lock = CURRENT_COMMAND.lock().await;
+
     async_manager::timeout(Duration::from_secs(3), async {
         chat::send("/Players");
 
@@ -37,6 +39,7 @@ pub async fn execute() -> Result<HashMap<Rank, Vec<Player>>> {
 
     let map = read_rank_lines().await?;
 
+    drop(lock);
     Ok(map)
 }
 

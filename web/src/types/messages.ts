@@ -22,11 +22,19 @@ export interface AskRanksJsonMessage {
 export interface AskBlocksJsonMessage {
   type: "askBlocks";
 }
+export interface AskBlockPropertiesJsonMessage {
+  type: "askBlockProperties";
+  /**
+   * id or name
+   */
+  data: string;
+}
 
 export type JsonMessage =
   | ChatCommandJsonMessage
   | TabListSubscribeJsonMessage
   | AskColorCodesJsonMessage
+  | RenderTextJsonMessage
   | AskRanksJsonMessage
   | AskBlocksJsonMessage
-  | RenderTextJsonMessage;
+  | AskBlockPropertiesJsonMessage;

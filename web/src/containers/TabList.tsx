@@ -2,7 +2,7 @@ import { H5, Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
 import { RenderedText } from "../components/RenderedText";
 import { Connection, useConnection } from "../Connection";
-import { JsonEvent, JsonPlayer, Rank } from "../types";
+import { JsonEvent, JsonPlayer, JsonRank } from "../types";
 
 export function usePlayers({ connection }: { connection: Connection }) {
   const [players, setPlayers] = useState<Record<number, JsonPlayer>>({});
@@ -36,7 +36,7 @@ export function usePlayers({ connection }: { connection: Connection }) {
     };
   }, [connection]);
 
-  const [ranks, setRanks] = useState<Rank[]>([]);
+  const [ranks, setRanks] = useState<JsonRank[]>([]);
 
   useEffect(() => {
     function listener(obj: JsonEvent) {
@@ -83,7 +83,7 @@ function PlayerMenuItem({
   connection,
 }: {
   player: JsonPlayer;
-  ranks: Rank[];
+  ranks: JsonRank[];
   connection: Connection;
 }) {
   const rank = ranks.find((r) => r.permission === 120 - p.rank);

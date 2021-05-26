@@ -122,3 +122,48 @@ export interface JsonColor {
   b: number;
   a: number;
 }
+
+export interface JsonBlockProperties {
+  basic: BasicBlockProperties;
+  complex: ComplexBlockProperties;
+}
+
+export interface BasicBlockProperties {
+  deathMessage: string | null;
+  killerBlock: boolean;
+  isTDoor: boolean;
+  isDoor: boolean;
+  oDoorBlock: boolean;
+  isMessageBlock: boolean;
+  isPortal: boolean;
+  waterKills: boolean;
+  lavaKills: boolean;
+  opBlock: boolean;
+  isRails: boolean;
+  animalAi: AnimalAI | null;
+  stackBlock: string | null;
+  drownable: boolean;
+  grassBlock: string | null;
+  dirtBlock: string | null;
+}
+
+export enum AnimalAI {
+  None,
+  Fly,
+  FleeAir,
+  KillerAir,
+  FleeWater,
+  KillerWater,
+  FleeLava,
+  KillerLava,
+}
+
+export interface ComplexBlockProperties {
+  basicBlockName: string | null;
+  lightPass: boolean;
+  needRestart: boolean;
+  physics: boolean;
+  allowBreak: boolean;
+  walkthrough: boolean;
+  walkthroughActivated: boolean;
+}

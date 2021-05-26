@@ -33,12 +33,12 @@ mod helpers;
 mod infos;
 mod types;
 
+pub use self::types::*;
 use self::{
     helpers::is_blocks_complex_info_start_message,
     infos::{parse_basic_info_message, parse_complex_info_message},
-    types::BlockProperties,
 };
-use super::{helpers::is_continuation_message, wait_for_message, SHOULD_BLOCK};
+use super::{helpers::is_continuation_message, wait_for_message, CURRENT_COMMAND, SHOULD_BLOCK};
 use crate::{
     async_manager, chat,
     error::*,
@@ -51,6 +51,7 @@ use classicube_helpers::CellGetSet;
 use std::time::Duration;
 
 pub async fn execute(block_name: &str) -> Result<BlockProperties> {
+    let lock = CURRENT_COMMAND.lock().await;
     let mut properties = BlockProperties::default();
 
     async_manager::timeout(Duration::from_secs(3), async {
@@ -58,7 +59,7 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
 
         loop {
             let message = wait_for_message().await;
-            if is_blocks_start_message(&message, block_name) {
+            if is_blocks_start_message(&message) {
                 SHOULD_BLOCK.set(true);
                 break;
             }
@@ -74,15 +75,15 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
             let message = wait_for_message().await;
             if parse_basic_info_message(&message, &mut properties.basic) {
                 SHOULD_BLOCK.set(true);
-            } else if is_blocks_complex_info_start_message(&message, block_name) {
+            } else if is_blocks_complex_info_start_message(&message) {
                 SHOULD_BLOCK.set(true);
                 has_complex_info = true;
                 break;
-            } else if is_blocks_looks_like_start_message(&message, block_name) {
+            } else if is_blocks_looks_like_start_message(&message) {
                 SHOULD_BLOCK.set(true);
                 has_looks_like = true;
                 break;
-            } else if is_blocks_looks_like_none_message(&message, block_name) {
+            } else if is_blocks_looks_like_none_message(&message) {
                 SHOULD_BLOCK.set(true);
                 break;
             }
@@ -137,6 +138,7 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
         }
     }
 
+    drop(lock);
     Ok(properties)
 }
 

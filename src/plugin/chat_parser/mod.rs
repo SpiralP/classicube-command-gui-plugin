@@ -9,11 +9,16 @@ use classicube_sys::{
     MsgType, MsgType_MSG_TYPE_NORMAL, Net_Handler, Protocol, Server, UNSAFE_GetString,
     OPCODE__OPCODE_MESSAGE,
 };
-use futures::channel::oneshot;
+use futures::{channel::oneshot, lock::Mutex};
+use lazy_static::lazy_static;
 use std::{
     cell::{Cell, RefCell},
     slice,
 };
+
+lazy_static! {
+    pub static ref CURRENT_COMMAND: Mutex<()> = Default::default();
+}
 
 thread_local!(
     pub static SHOULD_BLOCK: Cell<bool> = Cell::new(false);

@@ -1,15 +1,12 @@
-pub fn is_blocks_start_message(message: &str, block_name: &str) -> bool {
-    message == format!("&aProperties of {}:", block_name)
+pub fn is_blocks_start_message(message: &str) -> bool {
+    message.starts_with("&aProperties of ") && message.ends_with(":")
 }
 
 #[test]
 fn test_is_blocks_start_message() {
-    assert!(is_blocks_start_message("&aProperties of Air:", "Air"));
-    assert!(is_blocks_start_message(
-        "&aProperties of Woodstair-D-N:",
-        "Woodstair-D-N"
-    ));
-    assert!(!is_blocks_start_message("naw", "naw"));
+    assert!(is_blocks_start_message("&aProperties of Air:"));
+    assert!(is_blocks_start_message("&aProperties of Woodstair-D-N:"));
+    assert!(!is_blocks_start_message("naw"));
 }
 
 pub fn is_blocks_properties_message(message: &str) -> Option<&str> {
@@ -31,34 +28,31 @@ fn test_is_blocks_properties_message() {
     assert!(is_blocks_properties_message("naw").is_none());
 }
 
-pub fn is_blocks_complex_info_start_message(message: &str, block_name: &str) -> bool {
-    message == format!("&bComplex information for \"{}\":", block_name)
+pub fn is_blocks_complex_info_start_message(message: &str) -> bool {
+    message.starts_with("&bComplex information for \"") && message.ends_with("\":")
 }
 
 #[test]
 fn test_is_blocks_complex_info_start_message() {
     assert!(is_blocks_complex_info_start_message(
-        "&bComplex information for \"Door_Lava\":",
-        "Door_Lava"
+        "&bComplex information for \"Door_Lava\":"
     ));
-    assert!(!is_blocks_complex_info_start_message("naw", "naw"));
+    assert!(!is_blocks_complex_info_start_message("naw"));
 }
 
-pub fn is_blocks_looks_like_start_message(message: &str, block_name: &str) -> bool {
-    message == format!("&7Blocks which look like \"{}\":", block_name)
+pub fn is_blocks_looks_like_start_message(message: &str) -> bool {
+    message.starts_with("&7Blocks which look like \"") && message.ends_with("\":")
 }
 
 #[test]
 fn test_is_blocks_looks_like_start_message() {
     assert!(is_blocks_looks_like_start_message(
-        "&7Blocks which look like \"Air\":",
-        "Air"
+        "&7Blocks which look like \"Air\":"
     ));
     assert!(is_blocks_looks_like_start_message(
         "&7Blocks which look like \"Woodstair-D-N\":",
-        "Woodstair-D-N"
     ));
-    assert!(!is_blocks_looks_like_start_message("naw", "naw"));
+    assert!(!is_blocks_looks_like_start_message("naw"));
 }
 
 pub fn is_blocks_looks_like_message(message: &str) -> bool {
@@ -77,15 +71,14 @@ fn test_is_blocks_looks_like_message() {
     assert!(!is_blocks_looks_like_message("naw"));
 }
 
-pub fn is_blocks_looks_like_none_message(message: &str, block_name: &str) -> bool {
-    message == format!("&7No complex blocks look like \"{}\"", block_name)
+pub fn is_blocks_looks_like_none_message(message: &str) -> bool {
+    message.starts_with("&7No complex blocks look like \"") && message.ends_with("\"")
 }
 
 #[test]
 fn test_is_blocks_looks_like_none_message() {
     assert!(is_blocks_looks_like_none_message(
         "&7No complex blocks look like \"Woodstair-D-N\"",
-        "Woodstair-D-N"
     ));
-    assert!(!is_blocks_looks_like_none_message("naw", "naw"));
+    assert!(!is_blocks_looks_like_none_message("naw"));
 }

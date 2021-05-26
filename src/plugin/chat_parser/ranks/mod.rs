@@ -1,7 +1,7 @@
 mod helpers;
 
 use self::helpers::is_ranks_message;
-use super::{wait_for_message, SHOULD_BLOCK};
+use super::{wait_for_message, CURRENT_COMMAND, SHOULD_BLOCK};
 use crate::{async_manager, chat, error::*, plugin::chat_parser::helpers::remove_color_right};
 use classicube_helpers::CellGetSet;
 use error_chain::bail;
@@ -19,6 +19,8 @@ pub struct Rank {
 }
 
 pub async fn execute() -> Result<Vec<Rank>> {
+    let lock = CURRENT_COMMAND.lock().await;
+
     let mut ranks = Vec::new();
 
     let timeout_result = async_manager::timeout(Duration::from_secs(3), async {
@@ -74,6 +76,7 @@ pub async fn execute() -> Result<Vec<Rank>> {
         }
     }
 
+    drop(lock);
     Ok(ranks)
 }
 

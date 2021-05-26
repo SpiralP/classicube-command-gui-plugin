@@ -41,7 +41,7 @@ pub fn parse_basic_info_message(mut message: &str, p: &mut BasicBlockProperties)
         p.lava_kills = true;
         true
     } else if message == "Is not affected by explosions" {
-        p.o_p_block = true;
+        p.op_block = true;
         true
     } else if message.starts_with("Can be used as rails for ") && message.ends_with("/Train") {
         p.is_rails = true;

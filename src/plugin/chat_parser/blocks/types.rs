@@ -37,7 +37,7 @@ pub struct BasicBlockProperties {
     /// Is destroyed by flooding lava
     pub lava_kills: bool,
     /// Is not affected by explosions
-    pub o_p_block: bool,
+    pub op_block: bool,
     /// Can be used as rails for &T/Train
     pub is_rails: bool,
     /// Has the {0} AI behaviour
@@ -83,7 +83,7 @@ impl Default for BasicBlockProperties {
             is_portal: false,
             water_kills: false,
             lava_kills: false,
-            o_p_block: false,
+            op_block: false,
             is_rails: false,
             animal_ai: None,
             stack_block: None,

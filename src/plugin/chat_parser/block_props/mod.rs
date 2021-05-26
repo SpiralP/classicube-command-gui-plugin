@@ -9,7 +9,7 @@
 mod helpers;
 
 use self::helpers::is_block_props_message;
-use super::{helpers::is_continuation_message, wait_for_message, SHOULD_BLOCK};
+use super::{helpers::is_continuation_message, wait_for_message, CURRENT_COMMAND, SHOULD_BLOCK};
 use crate::{
     async_manager, chat, error::*,
     plugin::chat_parser::block_props::helpers::is_block_props_end_message,
@@ -19,6 +19,9 @@ use std::time::Duration;
 use tracing::*;
 
 pub async fn execute() -> Result<Vec<String>> {
+    let lock = CURRENT_COMMAND.lock().await;
+    let mut block_names = Vec::new();
+
     let mut maybe_full_line = async_manager::timeout(Duration::from_secs(3), async {
         chat::send("/Overseer BlockProps list all");
 
@@ -56,14 +59,15 @@ pub async fn execute() -> Result<Vec<String>> {
         .chain_err(|| "never found end message for BlockProps response")?;
 
         if let Some(full_line) = full_line.get(2..) {
-            return Ok(full_line
+            block_names = full_line
                 .split(", ")
                 .map(|s| s.to_string())
-                .collect::<Vec<_>>());
+                .collect::<Vec<_>>();
         }
     }
 
-    Ok(vec![])
+    drop(lock);
+    Ok(block_names)
 }
 
 #[test]

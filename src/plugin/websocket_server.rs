@@ -261,6 +261,25 @@ async fn handle_incoming(
                 });
             }
 
+            JsonMessage::AskBlockProperties(id) => {
+                async_manager::spawn_on_main_thread(async move {
+                    if let Err(e) = async {
+                        let properties = chat_parser::blocks::execute(&id).await?;
+
+                        event_queue
+                            .send(JsonEvent::BlockProperties(properties))
+                            .await
+                            .chain_err(|| "sending message")?;
+
+                        Ok::<_, Error>(())
+                    }
+                    .await
+                    {
+                        warn!("AskBlockProperties {}: {}", id, e);
+                    }
+                });
+            }
+
             JsonMessage::RenderText { text, size, shadow } => {
                 let mut event_queue = event_queue.clone();
                 async_manager::spawn_on_main_thread(async move {
