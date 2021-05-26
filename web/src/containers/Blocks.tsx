@@ -2,7 +2,14 @@ import { Card, H5, Spinner, Switch } from "@blueprintjs/core";
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useConnection } from "../Connection";
-import { JsonBlock, JsonEvent } from "../types";
+import {
+  CollideType,
+  DrawType,
+  JsonBlock,
+  JsonEvent,
+  SoundType,
+} from "../types";
+import { SelectEnumItems } from "./SelectEnumItems";
 
 export function useBlocks() {
   const connection = useConnection();
@@ -15,12 +22,10 @@ export function useBlocks() {
     function listener(obj: JsonEvent) {
       if (obj.type === "blocks") {
         setBlocks(obj.data);
-        setLoading(false);
       }
     }
     connection.addListener(listener);
     connection.send({ type: "askBlocks" });
-    setLoading(true);
 
     return () => {
       connection.removeListener(listener);
@@ -51,6 +56,51 @@ export function useBlocks() {
     },
   };
 }
+
+const SoundTypeEnumItems = [
+  { label: "None", value: SoundType.SOUND_NONE },
+  { label: "Wood", value: SoundType.SOUND_WOOD },
+  { label: "Gravel", value: SoundType.SOUND_GRAVEL },
+  { label: "Grass", value: SoundType.SOUND_GRASS },
+  { label: "Stone", value: SoundType.SOUND_STONE },
+  { label: "Metal", value: SoundType.SOUND_METAL },
+  { label: "Glass", value: SoundType.SOUND_GLASS },
+  { label: "Cloth", value: SoundType.SOUND_CLOTH },
+  { label: "Sand", value: SoundType.SOUND_SAND },
+  { label: "Snow", value: SoundType.SOUND_SNOW },
+];
+
+const DrawTypeEnumItems = [
+  { label: "Opaque", value: DrawType.DRAW_OPAQUE },
+  { label: "Transparent", value: DrawType.DRAW_TRANSPARENT },
+  {
+    label: "Transparent_thick",
+    value: DrawType.DRAW_TRANSPARENT_THICK,
+  },
+  { label: "Translucent", value: DrawType.DRAW_TRANSLUCENT },
+  { label: "Gas", value: DrawType.DRAW_GAS },
+  { label: "Sprite", value: DrawType.DRAW_SPRITE },
+];
+
+const CollideTypeEnumItems = [
+  { label: "Gas", value: CollideType.COLLIDE_GAS },
+  { label: "Liquid", value: CollideType.COLLIDE_LIQUID },
+  { label: "Solid", value: CollideType.COLLIDE_SOLID },
+  { label: "Ice", value: CollideType.COLLIDE_ICE },
+  {
+    label: "Slippery ice",
+    value: CollideType.COLLIDE_SLIPPERY_ICE,
+  },
+  {
+    label: "Liquid water",
+    value: CollideType.COLLIDE_LIQUID_WATER,
+  },
+  {
+    label: "Liquid lava",
+    value: CollideType.COLLIDE_LIQUID_LAVA,
+  },
+  { label: "Climb rope", value: CollideType.COLLIDE_CLIMB_ROPE },
+];
 
 function BlockCard({
   block,
@@ -93,6 +143,42 @@ function BlockCard({
                 }}
               />
             ))}
+            <SelectEnumItems<SoundType>
+              text="digSounds"
+              value={block.digSounds}
+              enumItems={SoundTypeEnumItems}
+              onItemSelect={({ value }) => {
+                changeBlockProp(block.id, "digSounds", value);
+              }}
+              disabled={disabled}
+            />
+            <SelectEnumItems<SoundType>
+              text="stepSounds"
+              value={block.stepSounds}
+              enumItems={SoundTypeEnumItems}
+              onItemSelect={({ value }) => {
+                changeBlockProp(block.id, "stepSounds", value);
+              }}
+              disabled={disabled}
+            />
+            <SelectEnumItems<DrawType>
+              text="draw"
+              value={block.draw}
+              enumItems={DrawTypeEnumItems}
+              onItemSelect={({ value }) => {
+                changeBlockProp(block.id, "draw", value);
+              }}
+              disabled={disabled}
+            />
+            <SelectEnumItems<CollideType>
+              text="collide"
+              value={block.collide}
+              enumItems={CollideTypeEnumItems}
+              onItemSelect={({ value }) => {
+                changeBlockProp(block.id, "collide", value);
+              }}
+              disabled={disabled}
+            />
           </>
         ) : null}
       </div>
