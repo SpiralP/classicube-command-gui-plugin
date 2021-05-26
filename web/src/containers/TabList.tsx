@@ -1,7 +1,7 @@
 import { H5, Menu, MenuItem, PopoverInteractionKind } from "@blueprintjs/core";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RenderedText } from "../components/RenderedText";
-import { Connection, ConnectionContext } from "../Connection";
+import { Connection, useConnection } from "../Connection";
 import { JsonEvent, JsonPlayer, Rank } from "../types";
 
 export function usePlayers({ connection }: { connection: Connection }) {
@@ -59,8 +59,7 @@ export function usePlayers({ connection }: { connection: Connection }) {
 }
 
 export function TabList() {
-  const connection = useContext(ConnectionContext);
-  if (!connection) throw new Error("!connection");
+  const connection = useConnection();
 
   const { players, ranks } = usePlayers({ connection });
 

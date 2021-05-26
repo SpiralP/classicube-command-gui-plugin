@@ -33,5 +33,6 @@ module.exports = {
     "react/jsx-boolean-value": [2, "never"],
 
     "@typescript-eslint/tslint/config": 0,
+    "react/jsx-no-bind": 0,
   },
 };

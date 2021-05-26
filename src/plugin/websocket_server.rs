@@ -1,7 +1,7 @@
 use super::{
     chat_parser,
     helpers::bitmap_col_a,
-    json_types::{JsonEvent, JsonMessage},
+    json_types::{JsonBlock, JsonEvent, JsonMessage},
     tab_list_events,
 };
 use crate::{
@@ -237,7 +237,26 @@ async fn handle_incoming(
                     }
                     .await
                     {
-                        warn!("{}", e);
+                        warn!("AskRanks {}", e);
+                    }
+                });
+            }
+
+            JsonMessage::AskBlocks => {
+                async_manager::spawn_on_main_thread(async move {
+                    if let Err(e) = async move {
+                        let blocks = unsafe { JsonBlock::get_all() };
+
+                        event_queue
+                            .send(JsonEvent::Blocks(blocks))
+                            .await
+                            .chain_err(|| "sending message")?;
+
+                        Ok::<_, Error>(())
+                    }
+                    .await
+                    {
+                        warn!("AskBlocks: {}", e);
                     }
                 });
             }

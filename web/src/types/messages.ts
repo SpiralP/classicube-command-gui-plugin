@@ -19,10 +19,14 @@ export interface RenderTextJsonMessage {
 export interface AskRanksJsonMessage {
   type: "askRanks";
 }
+export interface AskBlocksJsonMessage {
+  type: "askBlocks";
+}
 
 export type JsonMessage =
   | ChatCommandJsonMessage
   | TabListSubscribeJsonMessage
   | AskColorCodesJsonMessage
   | AskRanksJsonMessage
+  | AskBlocksJsonMessage
   | RenderTextJsonMessage;

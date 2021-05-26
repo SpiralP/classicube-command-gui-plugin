@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { ConnectionArgs, JsonEvent, JsonMessage } from "./types";
 
 export class Connection {
@@ -31,6 +31,12 @@ export class Connection {
 
 export const ConnectionContext =
   createContext<Connection | undefined>(undefined);
+
+export function useConnection() {
+  const connection = useContext(ConnectionContext);
+  if (!connection) throw new Error("!connection");
+  return connection;
+}
 
 export function useSetupConnection(connectionArgs?: ConnectionArgs) {
   const [connection, setConnection] =

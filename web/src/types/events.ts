@@ -1,4 +1,4 @@
-import { ColorCode, JsonPlayer } from "./other";
+import { ColorCode, JsonBlock, JsonPlayer, JsonRank } from "./other";
 
 export interface NewPlayersJsonEvent {
   type: "newPlayers";
@@ -41,14 +41,11 @@ export interface RenderedTextJsonEvent {
 }
 export interface RanksJsonMessage {
   type: "ranks";
-  data: Rank[];
+  data: JsonRank[];
 }
-export interface Rank {
-  colorCode: string;
-  rankName: string;
-  drawLimit: number;
-  permission: number;
-  maxRealms: number;
+export interface BlocksJsonMessage {
+  type: "blocks";
+  data: JsonBlock[];
 }
 
 export type JsonEvent =
@@ -59,4 +56,5 @@ export type JsonEvent =
   | WeDisconnectedJsonEvent
   | ColorCodesJsonEvent
   | RenderedTextJsonEvent
-  | RanksJsonMessage;
+  | RanksJsonMessage
+  | BlocksJsonMessage;

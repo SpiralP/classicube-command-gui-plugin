@@ -1,7 +1,6 @@
 import { Card, H5, Spinner } from "@blueprintjs/core";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RenderedText } from "../components/RenderedText";
-import { ConnectionContext } from "../Connection";
 import { CommandInfo } from "../types";
 
 function useCommands() {
@@ -28,11 +27,11 @@ function useCommands() {
   return commands;
 }
 
-function CommandCard({ command }: { command: CommandInfo & { name: string } }) {
+function CommandCard({ command }: { command: CommandInfo }) {
   const { name, help } = command;
 
   return (
-    <Card interactive key={name}>
+    <Card interactive>
       <H5>
         <RenderedText shadow={false}>{name}</RenderedText>
       </H5>
@@ -48,18 +47,13 @@ function CommandCard({ command }: { command: CommandInfo & { name: string } }) {
 }
 
 export function Commands() {
-  const connection = useContext(ConnectionContext);
   const commands = useCommands();
-
-  connection?.addListener(() => {
-    //
-  });
 
   return (
     <>
       {commands ? (
-        Object.entries(commands).map(([name, info]) => (
-          <CommandCard key={name} command={{ ...info, name }} />
+        Object.values(commands).map((command) => (
+          <CommandCard key={command.name} command={command} />
         ))
       ) : (
         <Spinner />
