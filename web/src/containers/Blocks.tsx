@@ -187,8 +187,12 @@ function BlockCard({
             </div>
           }
           renderTarget={({ isOpen, ref, ...targetProps }) => (
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            <Button {...targetProps} elementRef={ref} text="Properties" />
+            <Button
+              // eslint-disable-next-line react/jsx-props-no-spreading
+              {...targetProps}
+              elementRef={ref || undefined}
+              text="Properties"
+            />
           )}
         />
       </>
