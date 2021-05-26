@@ -67,4 +67,5 @@ export type JsonEvent =
   | ColorCodesJsonEvent
   | RenderedTextJsonEvent
   | RanksJsonMessage
-  | BlocksJsonMessage;
+  | BlocksJsonMessage
+  | BlockPropertiesJsonMessage;

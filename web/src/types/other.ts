@@ -124,6 +124,7 @@ export interface JsonColor {
 }
 
 export interface JsonBlockProperties {
+  id: string;
   basic: BasicBlockProperties;
   complex: ComplexBlockProperties;
 }

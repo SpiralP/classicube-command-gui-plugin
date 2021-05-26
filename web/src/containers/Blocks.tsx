@@ -1,4 +1,5 @@
-import { Card, H5, Spinner, Switch } from "@blueprintjs/core";
+import { Button, Card, H5, Spinner, Switch } from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useConnection } from "../Connection";
@@ -9,6 +10,7 @@ import {
   JsonEvent,
   SoundType,
 } from "../types";
+import { BlockProperties } from "./BlockProperties";
 import { SelectEnumItems } from "./SelectEnumItems";
 
 export function useBlocks() {
@@ -18,7 +20,6 @@ export function useBlocks() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("fetching");
     function listener(obj: JsonEvent) {
       if (obj.type === "blocks") {
         setBlocks(obj.data);
@@ -121,67 +122,82 @@ function BlockCard({
     ["canDelete", block.canDelete],
   ];
 
-  const { ref, inView } = useInView();
+  const { ref: containerRef, inView } = useInView();
+
+  let el = null;
+  if (inView) {
+    el = (
+      <>
+        <H5>{`${block.name} ${block.id}`}</H5>
+        {booleans.map(([propName, value]) => (
+          <Switch
+            disabled={disabled}
+            inline
+            key={propName}
+            checked={value}
+            innerLabel={propName}
+            large
+            onChange={(event) => {
+              const { checked } = event.target as HTMLInputElement;
+              changeBlockProp(block.id, propName, checked);
+            }}
+          />
+        ))}
+        <SelectEnumItems<SoundType>
+          text="digSounds"
+          value={block.digSounds}
+          enumItems={SoundTypeEnumItems}
+          onItemSelect={({ value }) => {
+            changeBlockProp(block.id, "digSounds", value);
+          }}
+          disabled={disabled}
+        />
+        <SelectEnumItems<SoundType>
+          text="stepSounds"
+          value={block.stepSounds}
+          enumItems={SoundTypeEnumItems}
+          onItemSelect={({ value }) => {
+            changeBlockProp(block.id, "stepSounds", value);
+          }}
+          disabled={disabled}
+        />
+        <SelectEnumItems<DrawType>
+          text="draw"
+          value={block.draw}
+          enumItems={DrawTypeEnumItems}
+          onItemSelect={({ value }) => {
+            changeBlockProp(block.id, "draw", value);
+          }}
+          disabled={disabled}
+        />
+        <SelectEnumItems<CollideType>
+          text="collide"
+          value={block.collide}
+          enumItems={CollideTypeEnumItems}
+          onItemSelect={({ value }) => {
+            changeBlockProp(block.id, "collide", value);
+          }}
+          disabled={disabled}
+        />
+        <Popover2
+          interactionKind="click"
+          content={
+            <div>
+              <BlockProperties id={`${block.id}`} />
+            </div>
+          }
+          renderTarget={({ isOpen, ref, ...targetProps }) => (
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            <Button {...targetProps} elementRef={ref} text="Properties" />
+          )}
+        />
+      </>
+    );
+  }
 
   return (
     <Card interactive>
-      <div ref={ref}>
-        {inView ? (
-          <>
-            <H5>{`${block.name} ${block.id}`}</H5>
-            {booleans.map(([propName, value]) => (
-              <Switch
-                disabled={disabled}
-                inline
-                key={propName}
-                checked={value}
-                innerLabel={propName}
-                large
-                onChange={(event) => {
-                  const { checked } = event.target as HTMLInputElement;
-                  changeBlockProp(block.id, propName, checked);
-                }}
-              />
-            ))}
-            <SelectEnumItems<SoundType>
-              text="digSounds"
-              value={block.digSounds}
-              enumItems={SoundTypeEnumItems}
-              onItemSelect={({ value }) => {
-                changeBlockProp(block.id, "digSounds", value);
-              }}
-              disabled={disabled}
-            />
-            <SelectEnumItems<SoundType>
-              text="stepSounds"
-              value={block.stepSounds}
-              enumItems={SoundTypeEnumItems}
-              onItemSelect={({ value }) => {
-                changeBlockProp(block.id, "stepSounds", value);
-              }}
-              disabled={disabled}
-            />
-            <SelectEnumItems<DrawType>
-              text="draw"
-              value={block.draw}
-              enumItems={DrawTypeEnumItems}
-              onItemSelect={({ value }) => {
-                changeBlockProp(block.id, "draw", value);
-              }}
-              disabled={disabled}
-            />
-            <SelectEnumItems<CollideType>
-              text="collide"
-              value={block.collide}
-              enumItems={CollideTypeEnumItems}
-              onItemSelect={({ value }) => {
-                changeBlockProp(block.id, "collide", value);
-              }}
-              disabled={disabled}
-            />
-          </>
-        ) : null}
-      </div>
+      <div ref={containerRef}>{el}</div>
     </Card>
   );
 }

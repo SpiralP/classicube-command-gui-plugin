@@ -11,16 +11,13 @@ const renderText = memoizee(
   ): Promise<ImageData> => {
     return new Promise((resolve) => {
       function listener(obj: JsonEvent) {
-        if (obj.type === "renderedText") {
-          const {
-            text: text2,
-            size: size2,
-            shadow: shadow2,
-            pixels,
-            width,
-            height,
-          } = obj.data;
-          if (text !== text2 || size !== size2 || shadow !== shadow2) return;
+        if (
+          obj.type === "renderedText" &&
+          obj.data.text === text &&
+          obj.data.size === size &&
+          obj.data.shadow === shadow
+        ) {
+          const { pixels, width, height } = obj.data;
           connection.removeListener(listener);
 
           const imageData = new ImageData(

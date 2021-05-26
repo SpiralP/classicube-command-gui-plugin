@@ -62,6 +62,23 @@
     resize-observer-polyfill "^1.5.1"
     tslib "~1.13.0"
 
+"@blueprintjs/core@^3.44.3":
+  version "3.44.3"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.44.3.tgz#112364fe9cbf5b943cf7571d9a5caa50b6304958"
+  integrity sha512-95BYF5xI7d47jKJKQFXJ+UkJ8pS6qT6/U4Hj/UCuHPJhtBTfUQKaCeHYroA+LtCAEEb9p9oFkQwlXI+QHMmZeA==
+  dependencies:
+    "@blueprintjs/icons" "^3.26.1"
+    "@types/dom4" "^2.0.1"
+    classnames "^2.2"
+    dom4 "^2.1.5"
+    normalize.css "^8.0.1"
+    popper.js "^1.16.1"
+    react-lifecycles-compat "^3.0.4"
+    react-popper "^1.3.7"
+    react-transition-group "^2.9.0"
+    resize-observer-polyfill "^1.5.1"
+    tslib "~1.13.0"
+
 "@blueprintjs/eslint-config@^0.7.2":
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/@blueprintjs/eslint-config/-/eslint-config-0.7.2.tgz#c9258fbda936219258036fcbf7010bcedd7fa694"
@@ -93,6 +110,27 @@
   integrity sha512-1+yhYH1Fjj5qGx8drZUL2L1R42MiN0WVHTTKYqGEV9TAzhvFHCSZgALD7WNQa+FEibw/8B4U+79IRgUPJNEjow==
   dependencies:
     classnames "^2.2"
+    tslib "~1.13.0"
+
+"@blueprintjs/icons@^3.26.1":
+  version "3.26.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.26.1.tgz#90cef070264c4c0b6ae0302663755abeb991aee5"
+  integrity sha512-qxAnqhzt5WqYuWN+7p3Pk7bOrhj56YXzD8n79Met8+VIQ14IpKnxr7YAYmNB5X/dVweqXpEk6tKyUjnDjBhulw==
+  dependencies:
+    classnames "^2.2"
+    tslib "~1.13.0"
+
+"@blueprintjs/popover2@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-0.9.0.tgz#82cf4c3f5c9fad60335a145568190fc605ebce57"
+  integrity sha512-eyWHGDRuZF23O3FQXfotnHA/eX9ZDFki1oBUw2GF47xmWtJuAGLSD31iRADq/3y8MiacioGDdWdUrVp+ZphWRg==
+  dependencies:
+    "@blueprintjs/core" "^3.44.3"
+    "@popperjs/core" "^2.5.4"
+    classnames "^2.2"
+    dom4 "^2.1.5"
+    react-popper "^2.2.4"
+    resize-observer-polyfill "^1.5.1"
     tslib "~1.13.0"
 
 "@blueprintjs/select@^3.16.2":
@@ -155,6 +193,11 @@
   dependencies:
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
+
+"@popperjs/core@^2.5.4":
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.2.tgz#adea7b6953cbb34651766b0548468e743c6a2353"
+  integrity sha512-VZMYa7+fXHdwIq1TDhSXoVmSPEGM/aa+6Aiq3nVVJ9bXr24zScr+NlKFKC3iPljA7ho/GAZr+d2jOf5GIRC30Q==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
@@ -2412,6 +2455,11 @@ react-dom@^17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
+react-fast-compare@^3.0.1:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.0.tgz#641a9da81b6a6320f270e89724fb45a0b39e43bb"
+  integrity sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==
+
 react-intersection-observer@^8.32.0:
   version "8.32.0"
   resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-8.32.0.tgz#47249332e12e8bb99ed35a10bb7dd10446445a7b"
@@ -2438,6 +2486,14 @@ react-popper@^1.3.7:
     popper.js "^1.14.4"
     prop-types "^15.6.1"
     typed-styles "^0.0.7"
+    warning "^4.0.2"
+
+react-popper@^2.2.4:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-2.2.5.tgz#1214ef3cec86330a171671a4fbcbeeb65ee58e96"
+  integrity sha512-kxGkS80eQGtLl18+uig1UIf9MKixFSyPxglsgLBxlYnyDf65BiY9B3nZSc6C9XUNDgStROB0fMQlTEz1KxGddw==
+  dependencies:
+    react-fast-compare "^3.0.1"
     warning "^4.0.2"
 
 react-transition-group@^2.9.0:

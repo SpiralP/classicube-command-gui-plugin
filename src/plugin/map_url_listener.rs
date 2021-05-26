@@ -94,46 +94,46 @@ fn got_url(url: String) {
 
     debug!("map url {:?}", url);
 
-    async_manager::spawn(async move {
-        if let Err(e) = async move {
-            let stream = reqwest::get(url)
-                .await?
-                .bytes_stream()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, e))
-                .boxed();
+    // async_manager::spawn(async move {
+    //     if let Err(e) = async move {
+    //         let stream = reqwest::get(url)
+    //             .await?
+    //             .bytes_stream()
+    //             .map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+    //             .boxed();
 
-            let async_reader = tokio_util::io::StreamReader::new(stream);
-            let async_reader = tokio::io::BufReader::new(async_reader);
-            let async_reader = TokioAsyncReadCompatExt::compat(async_reader);
-            let mut reader = FuturesBlockOnReader { async_reader };
+    //         let async_reader = tokio_util::io::StreamReader::new(stream);
+    //         let async_reader = tokio::io::BufReader::new(async_reader);
+    //         let async_reader = TokioAsyncReadCompatExt::compat(async_reader);
+    //         let mut reader = FuturesBlockOnReader { async_reader };
 
-            tokio::task::spawn_blocking(move || {
-                while let Some(zip_file) = read_zipfile_from_stream(&mut reader)? {
-                    debug!(
-                        "{}: {} bytes ({} bytes packed)",
-                        zip_file.name(),
-                        zip_file.size(),
-                        zip_file.compressed_size()
-                    );
+    //         tokio::task::spawn_blocking(move || {
+    //             while let Some(zip_file) = read_zipfile_from_stream(&mut reader)? {
+    //                 debug!(
+    //                     "{}: {} bytes ({} bytes packed)",
+    //                     zip_file.name(),
+    //                     zip_file.size(),
+    //                     zip_file.compressed_size()
+    //                 );
 
-                    // let mut buf = [0u8; 16];
-                    // let n = zip_file.read(&mut buf)?;
-                    // debug!("The first {} bytes are: {:?}", n, &buf[0..n]);
-                }
+    //                 // let mut buf = [0u8; 16];
+    //                 // let n = zip_file.read(&mut buf)?;
+    //                 // debug!("The first {} bytes are: {:?}", n, &buf[0..n]);
+    //             }
 
-                debug!("done");
+    //             debug!("done");
 
-                Ok::<_, Error>(())
-            })
-            .await??;
+    //             Ok::<_, Error>(())
+    //         })
+    //         .await??;
 
-            Ok::<_, Error>(())
-        }
-        .await
-        {
-            warn!("{}", e);
-        }
-    });
+    //         Ok::<_, Error>(())
+    //     }
+    //     .await
+    //     {
+    //         warn!("{}", e);
+    //     }
+    // });
 }
 
 struct FuturesBlockOnReader<R>

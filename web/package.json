@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.31.0",
+    "@blueprintjs/popover2": "^0.9.0",
     "@blueprintjs/select": "^3.16.2",
     "memoizee": "^0.4.15",
     "react": "^17.0.2",

@@ -3,6 +3,7 @@ use serde::Serialize;
 #[derive(Serialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockProperties {
+    pub id: String,
     pub basic: BasicBlockProperties,
     pub complex: ComplexBlockProperties,
 }
@@ -10,6 +11,7 @@ pub struct BlockProperties {
 impl Default for BlockProperties {
     fn default() -> Self {
         Self {
+            id: String::new(),
             basic: Default::default(),
             complex: Default::default(),
         }

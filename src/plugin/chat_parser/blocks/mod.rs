@@ -48,11 +48,22 @@ use crate::{
     },
 };
 use classicube_helpers::CellGetSet;
-use std::time::Duration;
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    time::Duration,
+};
 
 pub async fn execute(block_name: &str) -> Result<BlockProperties> {
     let lock = CURRENT_COMMAND.lock().await;
+
+    // // if we're an integer, then we know for sure we don't have complex properties!
+    // let is_integer = block_name.parse::<usize>().is_ok();
+
     let mut properties = BlockProperties::default();
+    properties.id = block_name.to_string();
 
     async_manager::timeout(Duration::from_secs(3), async {
         chat::send(format!("/Blocks {}", block_name));
@@ -62,11 +73,20 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
             if is_blocks_start_message(&message) {
                 SHOULD_BLOCK.set(true);
                 break;
+            } else if message
+                .get(2..)
+                .map(|s| s == "Unable to find block or rank")
+                .unwrap_or(false)
+            {
+                SHOULD_BLOCK.set(true);
+                return Err("Unable to find block or rank".into());
             }
         }
+
+        Ok::<_, Error>(())
     })
     .await
-    .chain_err(|| "never found start message for /Blocks response")?;
+    .chain_err(|| "never found start message for /Blocks response")??;
 
     let mut has_looks_like = false;
     let mut has_complex_info = false;
@@ -93,25 +113,29 @@ pub async fn execute(block_name: &str) -> Result<BlockProperties> {
     .chain_err(|| "never found 1 message after start of /Blocks response")?;
 
     if has_complex_info {
-        let mut found_complex_info_body_message = false;
-        let timeout_result = async_manager::timeout(Duration::from_secs(3), async {
-            loop {
-                let message = wait_for_message().await;
-                if parse_complex_info_message(&message, &mut properties.complex) {
-                    SHOULD_BLOCK.set(true);
-                    found_complex_info_body_message = true;
-                }
-            }
-        })
-        .await;
+        let found_complex_info_body_message = Arc::new(AtomicBool::new(false));
 
-        if !found_complex_info_body_message {
+        let timeout_result = {
+            let found_complex_info_body_message = found_complex_info_body_message.clone();
+            async_manager::timeout(Duration::from_secs(3), async {
+                loop {
+                    let message = wait_for_message().await;
+                    if parse_complex_info_message(&message, &mut properties.complex) {
+                        SHOULD_BLOCK.set(true);
+                        found_complex_info_body_message.store(true, Ordering::Relaxed);
+                    }
+                }
+            })
+            .await
+        };
+
+        if !found_complex_info_body_message.load(Ordering::Relaxed) {
             timeout_result
                 .chain_err(|| "never found any 'complex info' messages for /Blocks response")?;
         }
     } else if has_looks_like {
         let mut found_looks_like_message = false;
-        let timeout_result = async_manager::timeout(Duration::from_secs(3), async {
+        let timeout_result = async_manager::timeout(Duration::from_secs(1), async {
             loop {
                 let message = wait_for_message().await;
                 if is_blocks_looks_like_message(&message) {
@@ -152,6 +176,7 @@ fn test_execute_blocks() {
         (
             "Air",
             BlockProperties {
+                id: "Air".to_string(),
                 basic: BasicBlockProperties {
                     death_message: Some("@p hit the floor &chard.".to_string()),
                     water_kills: true,
@@ -176,6 +201,7 @@ fn test_execute_blocks() {
         (
             "Woodstair-D-N",
             BlockProperties {
+                id: "Woodstair-D-N".to_string(),
                 basic: BasicBlockProperties {
                     ..Default::default()
                 },
@@ -191,6 +217,7 @@ fn test_execute_blocks() {
         (
             "Door_Lava",
             BlockProperties {
+                id: "Door_Lava".to_string(),
                 basic: BasicBlockProperties {
                     is_door: true,
                     ..Default::default()
